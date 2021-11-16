@@ -1,0 +1,52 @@
+.ratings {
+    position: absolute;
+    top: 30%;
+    font-size: x-large;
+}
+.clap-btn,
+.heart-btn,
+.like-btn {
+    display: inline-block;
+    Cursor: pointer;
+    width: 80px;
+    height: 80px;
+}
+
+.clap-btn {
+    background: url('../../images/claps.png') no-repeat 0% 50%;
+    background-size: 900%;
+}
+
+.heart-btn {
+    background: url('../../images/heart.png') no-repeat 0% 50%;
+    background-size: 2900%;
+}
+
+.like-btn {
+    background: url('../../images/like.png') no-repeat 0% 50%;
+    background-size: 200%;
+}
+
+.clap-active,
+.heart-active,
+.like-active {
+    animation-name: animate;
+    animation-duration: .8s;
+    animation-iteration-count: 1;
+    animation-fill-mode: forwards;
+}
+
+.clap-active {
+    animation-timing-function: steps(8);
+}
+.heart-active {
+    animation-timing-function: steps(28);
+}
+.like-active {
+    animation-timing-function: steps(1);
+}
+@keyframes animate {
+    0%   { background-position: left;  }
+    50%  { background-position: right; }
+    100% { background-position: right; }
+}
