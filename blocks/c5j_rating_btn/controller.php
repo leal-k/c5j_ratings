@@ -6,8 +6,9 @@
  *
  * @license MIT
  */
-namespace Concrete\Package\C5jRatings\Block\C5jRatings;
+namespace Concrete\Package\C5jRatings\Block\C5jRatingBtn;
 
+use C5jRatings\Entity\C5jRating;
 use Carbon\Carbon;
 use Concrete\Core\Asset\Asset;
 use Concrete\Core\Asset\AssetList;
@@ -24,7 +25,7 @@ class Controller extends BlockController
 
     public function getBlockTypeName(): string
     {
-        return t('C5j Ratings');
+        return t('C5j Rating Button');
     }
 
     public function getBlockTypeDescription(): string
@@ -46,19 +47,17 @@ class Controller extends BlockController
         $this->requireAsset('javascript', 'client');
     }
 
-    public function add()
-    {
-        //
-    }
-
-    public function edit()
-    {
-        //
-    }
-
     public function view()
     {
         $this->set('ratings', $this->getRatingsCount());
+    }
+
+    private function getRatingsCount(): int
+    {
+        // TODO::Use entity
+        $sql = 'SELECT SUM(ratedValue) AS ratings FROM C5jRatings WHERE bID=?';
+
+        return (int) $this->db->fetchColumn($sql, [$this->bID]);
     }
 
     public function action_rate(int $bID)
@@ -71,6 +70,21 @@ class Controller extends BlockController
         }
     }
 
+    private function addRating($uID, $ratedValue): C5jRating
+    {
+        $rating = C5jRating::getByBIDAndUID($this->bID, $uID);
+        if (!$rating) {
+            $rating = new C5jRating();
+        }
+        $rating->setBID($this->bID);
+        $rating->setCID($this->getRequest()->getCurrentPage()->getCollectionID());
+        $rating->setUID($uID);
+        $rating->setRatedValue($ratedValue);
+        $rating->save();
+
+        return $rating;
+    }
+
     public function action_is_rated(int $bID)
     {
         if ($this->token->validate('is_rated', $this->post('token'))) {
@@ -78,25 +92,9 @@ class Controller extends BlockController
         }
     }
 
-    private function addRating($uID, $ratedValue): void
-    {
-        $sql = 'INSERT INTO C5jRatings (bID, uID, ratedValue, ratedAt)
-                    VALUES (?, ?, ?, ?)
-                    ON DUPLICATE KEY UPDATE ratedValue =?, ratedAt = ?';
-        $params = [$this->bID, $uID, $ratedValue, Carbon::now(), $ratedValue, Carbon::now()];
-
-        $this->db->executeQuery($sql, $params);
-    }
-
-    private function getRatingsCount(): int
-    {
-        $sql = 'SELECT SUM(ratedValue) AS ratings FROM C5jRatings WHERE bID=?';
-
-        return (int) $this->db->fetchColumn($sql, [$this->bID]);
-    }
-
     private function isRatedBy(int $uID): bool
     {
+        // TODO::Use entity
         $sql = "SELECT ratedValue FROM C5jRatings WHERE bID = ? AND uID = ?";
         $params = [$this->bID, $uID];
 
