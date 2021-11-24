@@ -6,6 +6,7 @@
 
 namespace C5jRatings\Page;
 use Doctrine\DBAL\Types\Type;
+use Pagerfanta\Adapter\DoctrineDbalAdapter;
 
 class PageList extends \Concrete\Core\Page\PageList
 {
@@ -38,5 +39,17 @@ class PageList extends \Concrete\Core\Page\PageList
     public function getResult($queryRow)
     {
         return $queryRow;
+    }
+
+    public function getPaginationAdapter()
+    {
+        $adapter = new DoctrineDbalAdapter($this->deliverQueryObject(), function ($query) {
+            // We need to reset the potential custom order by here because otherwise, if we've added
+            // items to the select parts, and we're ordering by them, we get a SQL error
+            // when we get total results, because we're resetting the select
+           $query->resetQueryParts(['orderBy'])->select('count(distinct p.cID)')->setMaxResults(1);
+        });
+
+        return $adapter;
     }
 }
