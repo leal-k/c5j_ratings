@@ -1,7 +1,7 @@
 <?php
 defined('C5_EXECUTE') or die('Access Denied.');
 
-use Concrete\Block\PageList\Controller;
+use Concrete\Package\C5jRatings\Block\C5jRatingPageList\Controller;
 
 $request = Request::getInstance();
 $request->setCurrentPage(Page::getByID($_REQUEST['current_page']));
@@ -26,6 +26,9 @@ if ($_REQUEST['filterDateOption'] == 'past') {
     $_REQUEST['filterDateDays'] = null;
 }
 
+$controller->filterByUserRated = (int) $_REQUEST['filterByUserRated'];
+$controller->miniNumOfRatings = (int) $_REQUEST['miniNumOfRatings'];
+$controller->numOfRatings = (int) $_REQUEST['numOfRatings'];
 $controller->num = $_REQUEST['num'];
 $controller->cParentID = $_REQUEST['cParentID'];
 $controller->cThis = $_REQUEST['cThis'];

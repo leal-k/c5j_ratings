@@ -27,14 +27,6 @@ if (is_object($c) && $c->isEditMode() && $controller->isBlockEmpty()) {
             <?php
         } ?>
 
-        <?php if (isset($rssUrl) && $rssUrl) {
-            ?>
-            <a href="<?php echo $rssUrl ?>" target="_blank" class="ccm-block-page-list-rss-feed">
-                <i class="fa fa-rss"></i>
-            </a>
-            <?php
-        } ?>
-
         <div class="ccm-block-page-list-pages">
 
             <?php
@@ -50,56 +42,38 @@ if (is_object($c) && $c->isEditMode() && $controller->isBlockEmpty()) {
                 $includeEntryText = true;
             }
 
+            if(isset($pages)){
+
             foreach ($pages as $page) {
 
-                // Prepare data for each page being listed...
-                $buttonClasses = 'ccm-block-page-list-read-more';
-                $entryClasses = 'ccm-block-page-list-page-entry';
-                $title = $page->getCollectionName();
-                if ($page->getCollectionPointerExternalLink() != '') {
-                    $url = $page->getCollectionPointerExternalLink();
-                    if ($page->openCollectionPointerExternalLinkInNewWindow()) {
-                        $target = '_blank';
+                $c = \Concrete\Core\Page\Page::getByID($page['cID'], 'ACTIVE');
+                if (is_object($c)) {
+                    $buttonClasses = 'ccm-block-page-list-read-more';
+                    $entryClasses = 'ccm-block-page-list-page-entry';
+                    $title = $c->getCollectionName();
+                    if ($c->getCollectionPointerExternalLink() != '') {
+                        $url = $c->getCollectionPointerExternalLink();
+                        if ($c->openCollectionPointerExternalLinkInNewWindow()) {
+                            $target = '_blank';
+                        }
+                    } else {
+                        $url = $c->getCollectionLink();
+                        $target = $c->getAttribute('nav_target');
                     }
-                } else {
-                    $url = $page->getCollectionLink();
-                    $target = $page->getAttribute('nav_target');
+                    $target = empty($target) ? '_self' : $target;
+                    $description = $c->getCollectionDescription();
+                    $description = $controller->truncateSummaries ? $th->wordSafeShortText($description, $controller->truncateChars) : $description;
+                    $thumbnail = false;
+                    if ($displayThumbnail) {
+                        $thumbnail = $c->getAttribute('thumbnail');
+                    }
+                    if (is_object($thumbnail) && $includeEntryText) {
+                        $entryClasses = 'ccm-block-page-list-page-entry-horizontal';
+                    }
+
+                    $date = $dh->formatDateTime($c->getCollectionDatePublic(), true);
                 }
-                $target = empty($target) ? '_self' : $target;
-                $description = $page->getCollectionDescription();
-                $description = $controller->truncateSummaries ? $th->wordSafeShortText($description, $controller->truncateChars) : $description;
-                $thumbnail = false;
-                if ($displayThumbnail) {
-                    $thumbnail = $page->getAttribute('thumbnail');
-                }
-                if (is_object($thumbnail) && $includeEntryText) {
-                    $entryClasses = 'ccm-block-page-list-page-entry-horizontal';
-                }
-
-                $date = $dh->formatDateTime($page->getCollectionDatePublic(), true);
-
-                //Other useful page data...
-
-                //$last_edited_by = $page->getVersionObject()->getVersionAuthorUserName();
-
-                /* DISPLAY PAGE OWNER NAME
-                 * $page_owner = UserInfo::getByID($page->getCollectionUserID());
-                 * if (is_object($page_owner)) {
-                 *     echo $page_owner->getUserDisplayName();
-                 * }
-                 */
-
-                /* CUSTOM ATTRIBUTE EXAMPLES:
-                 * $example_value = $page->getAttribute('example_attribute_handle', 'display');
-                 *
-                 * When you need the raw attribute value or object:
-                 * $example_value = $page->getAttribute('example_attribute_handle');
-                 */
-
-                /* End data preparation. */
-
-                /* The HTML from here through "endforeach" is repeated for every item in the list... */ ?>
-
+                ?>
                 <div class="<?php echo $entryClasses ?>">
 
                     <?php if (is_object($thumbnail)) {
@@ -133,6 +107,19 @@ if (is_object($c) && $c->isEditMode() && $controller->isBlockEmpty()) {
                                         <?php
 
                                     } ?>
+                                    <?php
+                                    if(isset($page['bID'])){
+                                        $controller = new Concrete\Package\C5jRatings\Block\C5jRatingPageList\Controller();
+                                        $btnType = $controller->getbtnType($page['bID']);
+                                        if($btnType){
+                                    ?>
+                                    <div>
+                                        <span class="<?= $btnType ?>-btn"></span><?= $page['ratings'] ?? 0 ?>
+                                    </div>
+                                        <?php
+                                        }
+                                    }
+                                        ?>
                                 </div>
                                 <?php
                             } ?>
@@ -164,7 +151,8 @@ if (is_object($c) && $c->isEditMode() && $controller->isBlockEmpty()) {
                 </div>
 
                 <?php
-            } ?>
+            }
+            }?>
         </div><!-- end .ccm-block-page-list-pages -->
 
         <?php if (count($pages) == 0) { ?>

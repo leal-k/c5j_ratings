@@ -198,15 +198,15 @@ $form = Loader::helper('form/page_selector');
                 <?php
                 // @TODO:: Implement actual filtering with minNumOfRatings, update the javascript
                 ?>
-                <div class="ccm-page-list-truncate-description" <?= ($includeDescription ? '' : 'style="display:none;"') ?>>
+                <div class="ccm-page-list-number-ratings">
                     <div class="input-group">
                         <span class="input-group-addon">
-                            <input id="ccm-pagelist-truncateSummariesOn" name="truncateSummaries" type="checkbox"
-                                   value="1" <?= ($truncateSummaries ? 'checked="checked"' : '') ?> />
+                            <input id="ccm-pagelist-miniNumOfRatings" name="miniNumOfRatings" type="checkbox"
+                                   value="1" <?= ($miniNumOfRatings ? 'checked="checked"' : '') ?> />
                             <?= t('Minimum number of ratings.') ?>
                         </span>
-                        <input class="form-control" id="ccm-pagelist-truncateChars" <?= ($truncateSummaries ? '' : 'disabled="disabled"') ?>
-                               type="text" name="truncateChars" size="3" value="<?= (int) $truncateChars ?>" />
+                        <input class="form-control" id="ccm-pagelist-numOfRatings" <?= ($miniNumOfRatings ? '' : 'disabled="disabled"') ?>
+                               type="text" name="numOfRatings" size="3" value="<?= (int) $numOfRatings ?>" />
                         <span class="input-group-addon">
                             <?= t('ratings') ?>
                         </span>

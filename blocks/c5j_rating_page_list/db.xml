@@ -121,6 +121,12 @@
     <field name="truncateChars" type="integer">
       <default value="128"/>
     </field>
+    <field name="miniNumOfRatings" type="integer">
+      <default value="0"/>
+    </field>
+    <field name="numOfRatings" type="integer">
+      <default value="128"/>
+    </field>
     <index name="ptID">
       <col>ptID</col>
     </index>

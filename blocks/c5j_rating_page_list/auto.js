@@ -19,6 +19,10 @@ var pageList ={
 		this.truncateSwitch.click(function(){ pageList.truncationShown(this); });
 		this.truncateSwitch.change(function(){ pageList.truncationShown(this); });
 
+		this.minimumRatingsSwitch=$('#ccm-pagelist-miniNumOfRatings');
+		this.minimumRatingsSwitch.click(function(){ pageList.ratingsShown(this); });
+		this.minimumRatingsSwitch.change(function(){ pageList.ratingsShown(this); });
+
         $('.pagelist-form').on('change.page-list-block', 'input[name=useButtonForLink]', function() {
             if ($(this).val() == '1') {
                 $('.ccm-page-list-button-text').slideDown();
@@ -53,6 +57,17 @@ var pageList ={
 		}else{
 			truncateTxt.addClass('faintText');
 			f.attr('disabled',true);
+		}
+	},
+	ratingsShown:function(cb){
+		//var truncateTxt=$('#ccm-pagelist-truncateTxt');
+		var R=$('#ccm-pagelist-numOfRatings');
+		if(cb.checked){
+			//truncateTxt.removeClass('faintText');
+			R.attr('disabled',false);
+		}else{
+			//truncateTxt.addClass('faintText');
+			R.attr('disabled',true);
 		}
 	},
 	showPane:function(pane){
@@ -99,6 +114,7 @@ var pageList ={
             name: "current_page",
             value: CCM_CID
         });
+
 
         $.get(this.servicesDir + 'preview_pane', query, function(msg) {
             preview_container.find('div.render').html(msg);
