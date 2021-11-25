@@ -12,7 +12,7 @@ $dh = Core::make('helper/date');
 
 if (is_object($c) && $c->isEditMode() && $controller->isBlockEmpty()) {
     ?>
-    <div class="ccm-edit-mode-disabled-item"><?php echo t('Empty Page List Block.') ?></div>
+    <div class="ccm-edit-mode-disabled-item"><?php echo t('Empty C5j Rating Page List Block.') ?></div>
     <?php
 } else {
     ?>
