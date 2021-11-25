@@ -185,7 +185,6 @@ class Controller extends \Concrete\Block\PageList\Controller
         if ($this->filterByUserRated) {
             $u = Core::make(User::class);
             $uID = $u->getUserID();
-            var_dump_safe($uID);
             $this->list->filterByUserRated($uID);
         }
 
