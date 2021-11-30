@@ -57,6 +57,15 @@ class Controller extends Package
         $this->installXml();
     }
 
+    /**
+     * Package upgrade process.
+     */
+    public function upgrade()
+    {
+        parent::upgrade();
+        $this->installXml();
+    }
+
     private function installXml(): void
     {
         $ci = new ContentImporter();
