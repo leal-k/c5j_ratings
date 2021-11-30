@@ -6,17 +6,16 @@
 
 namespace C5jRatings\Page;
 use Doctrine\DBAL\Types\Type;
-use Pagerfanta\Adapter\DoctrineDbalAdapter;
 
 class PageList extends \Concrete\Core\Page\PageList
 {
     public function __construct()
     {
         parent::__construct();
-        $this->query->innerJoin('p', 'C5jRatings', 'r', 'p.cID = r.cID and r.ratedValue = 1');
+        $this->query->leftJoin('p', 'C5jRatings', 'r', 'p.cID = r.cID');
         $this->query->addSelect('SUM(r.ratedValue) AS ratings');
         $this->query->addSelect('r.bID');
-        $this->query->addGroupBy('r.cID');
+        $this->query->addGroupBy('p.cID');
 
     }
 

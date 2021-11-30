@@ -108,20 +108,20 @@ if (is_object($c) && $c->isEditMode() && $controller->isBlockEmpty()) {
 
                                     } ?>
                                     <?php
-                                    if(isset($page['bID'])){
-                                        $controller = new Concrete\Package\C5jRatings\Block\C5jRatingPageList\Controller();
-                                        $btnType = $controller->getbtnType($page['bID']);
+                                    $displayRatings = $displayRatings ?? "";
+                                    $btnType = $btnType ?? "";
+                                    if($displayRatings){
                                         if($btnType){
-                                            $active = $controller->getRatedValue($page['bID'], $page['cID']) === 1 ? $btnType . '-active' : '';
-                                    ?>
-                                    <div class="ratings-<?= $page['cID'] ?>" id="<?= $btnType ?>">
-                                        <span class="<?= $btnType ?>-btn <?= $active ?>" id="btn-<?= $page['cID'] ?>" onclick="isRatedBy(<?= $page['cID'] ?>,<?= $page['bID'] ?>)"></span>
-                                            <span class="ratings" id="<?=$page['cID'] . '-' . $page['bID'] ?>"><?= $page['ratings'] ?? 0 ?></span>
-                                        <?php
-                                        }
-                                    }
+                                            $active = $controller->getRatedValue($page['cID']) === 1 ? $btnType . '-active' : '';
                                         ?>
-                                </div>
+                                        <div>
+                                            <span class="<?= $btnType ?>-btn <?= $active ?>" id="btn-<?= $page['cID'] ?>" onclick="isRatedBy(<?= $page['cID'] ?>)"></span>
+                                                <span class="ratings-<?= $page['cID'] ?>" id="<?=$btnType?>"><?= $page['ratings'] ?? 0 ?></span>
+                                        </div>
+                                        <?php
+                                             }
+                                        }
+                                        ?>
                                 <?php
                             } ?>
 
@@ -155,10 +155,6 @@ if (is_object($c) && $c->isEditMode() && $controller->isBlockEmpty()) {
             }
             }?>
         </div><!-- end .ccm-block-page-list-pages -->
-        <?php
-        $filterByUserRated = $filterByUserRated ?? 0;
-        ?>
-        <input type="hidden" id="filterByUserRated" value="<?=$filterByUserRated?>" />
 
         <?php if (count($pages) == 0) { ?>
             <div class="ccm-block-page-list-no-pages"><?php echo h($noResultsMessage) ?></div>
@@ -175,7 +171,7 @@ if (is_object($c) && $c->isEditMode() && $controller->isBlockEmpty()) {
 
 } ?>
 <script>
-    function isRatedBy(cID,bID) {
+    function isRatedBy(cID) {
         let uID = getUserID();
         let btnType = $(".ratings-"+cID).attr("id");
         let ratedValue = 1;
@@ -183,7 +179,7 @@ if (is_object($c) && $c->isEditMode() && $controller->isBlockEmpty()) {
             ratedValue = 0;
         }
 
-        rateIt(uID, cID, bID, ratedValue);
+        rateIt(uID, cID, ratedValue, btnType);
     }
 
     function getUserID() {
@@ -196,8 +192,7 @@ if (is_object($c) && $c->isEditMode() && $controller->isBlockEmpty()) {
         return uID;
     }
 
-    function rateIt(uID, cID, bID, ratedValue) {
-        let filterByUserRated = $("#filterByUserRated").val();
+    function rateIt(uID, cID, ratedValue, btnType) {
         $.ajax({
             url: "<?= $view->action('rate_page')?>",
             type: 'post',
@@ -205,13 +200,10 @@ if (is_object($c) && $c->isEditMode() && $controller->isBlockEmpty()) {
                 token: "<?= Core::make('token')->generate('rate_page') ?>",
                 uID: uID,
                 cID: cID,
-                bID: bID,
-                ratedValue: ratedValue,
-                filterByUserRated: filterByUserRated
+                ratedValue: ratedValue
             },
             success: function(data) {
-                $("#"+cID+"-"+bID).text(data['ratings']);
-                let btnType = $(".ratings-"+cID).attr("id");
+                $(".ratings-"+cID).text(data['ratings']);
                 if(ratedValue === 0){
                     $("#btn-"+cID).removeClass(btnType+"-active");
                 }else{

@@ -183,6 +183,33 @@ $form = Loader::helper('form/page_selector');
 
         <fieldset>
             <div class="form-group">
+                <label for="btnType" class="control-label"><?=t("Button Type")?></label>
+                <select id="btnType" name="btnType" ccm-passed-value="heart" class="form-control">
+                    <option value="clap"><?=t("Clap")?></option>
+                    <option value="heart" selected="selected"><?=t("Heart")?></option>
+                    <option value="like"><?=t("Like")?></option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label"><?=t("Display the total rating?")?></label>
+                <div class="radio">
+                    <label>
+                        <input type="radio" id="displayRatings1" name="displayRatings" value="1" class="ccm-input-radio" checked="checked">
+                        <?=t("Yes")?>
+                    </label>
+                </div>
+                <div class="radio">
+                    <label>
+                        <input type="radio" id="displayRatings2" name="displayRatings" value="0" class="ccm-input-radio">
+                        <?=t("No")?>
+                    </label>
+                </div>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <div class="form-group">
                 <label class="control-label"><?= t('Rating Filters') ?></label>
                     <?php
                     // @TODO:: Implement actual filtering

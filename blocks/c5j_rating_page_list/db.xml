@@ -127,6 +127,8 @@
     <field name="numOfRatings" type="integer">
       <default value="128"/>
     </field>
+    <field name="btnType" type="string" size="16"/>
+    <field name="displayRatings" type="boolean" />
     <index name="ptID">
       <col>ptID</col>
     </index>

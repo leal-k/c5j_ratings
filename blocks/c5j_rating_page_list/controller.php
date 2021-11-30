@@ -210,33 +210,23 @@ class Controller extends \Concrete\Block\PageList\Controller
         return $this->list;
     }
 
-    public function getbtnType(int $bID = 0)
-    {
-        $this->db = Core::make('database/connection');
-        $sql = 'SELECT btnType FROM btC5jRatings WHERE bID = ?';
-        $params = [$bID];
-
-        return $this->db->fetchColumn($sql, $params);
-
-    }
-
     public function action_rate_page(int $bID)
     {
         $this->token = $this->app->make('helper/validation/token');
         if ($this->token->validate('rate_page', $this->post('token'))) {
-            $this->addRating($this->post('uID'), $this->post('cID'), $this->post('bID'), $this->post('ratedValue'));
+            $this->addRating($this->post('uID'), $this->post('cID'),$bID, $this->post('ratedValue'));
 
-            return JsonResponse::create(['ratings' => $this->getRatingsCount($this->post('uID'), $this->post('cID'), $this->post('filterByUserRated'))]);
+            return JsonResponse::create(['ratings' => $this->getRatingsCount($this->post('uID'), $this->post('cID'))]);
         }
     }
 
-    public function getRatedValue(int $bID = 0, int $cID = 0): int
+    public function getRatedValue(int $cID = 0): int
     {
         $db = Database::connection();
         $u = Core::make(User::class);
         $uID = $u->getUserID();
-        $sql = 'SELECT ratedValue FROM C5jRatings WHERE cID = ? AND bID = ? AND uID = ?';
-        $params = [$cID, $bID, $uID];
+        $sql = 'SELECT ratedValue FROM C5jRatings WHERE cID = ? AND uID = ?';
+        $params = [$cID, $uID];
 
         return (int) $db->fetchColumn($sql, $params);
     }
@@ -258,7 +248,7 @@ class Controller extends \Concrete\Block\PageList\Controller
 
     private function addRating(int $uID, int $cID, int $bID, int $ratedValue): C5jRating
     {
-        $rating = C5jRating::getByBIDAndUID($bID, $uID);
+        $rating = C5jRating::getByCIDAndUID($cID, $uID);
         if (!$rating) {
             $rating = new C5jRating();
         }
@@ -271,17 +261,12 @@ class Controller extends \Concrete\Block\PageList\Controller
         return $rating;
     }
 
-    private function getRatingsCount(int $uID, int $cID, int $filterByUserRated): int
+    private function getRatingsCount(int $uID, int $cID): int
     {
         $db = Database::connection();
-        if($filterByUserRated){
-            $sql = 'SELECT SUM(ratedValue) AS ratings FROM C5jRatings WHERE uID=? and cID=? and ratedValue != 0';
+        $sql = 'SELECT SUM(ratedValue) AS ratings FROM C5jRatings WHERE cID=? and ratedValue != 0';
 
-            return (int) $db->fetchColumn($sql, [$uID, $cID]);
-        }
-            $sql = 'SELECT SUM(ratedValue) AS ratings FROM C5jRatings WHERE cID=? and ratedValue != 0';
-
-            return (int) $db->fetchColumn($sql, [$cID]);
+        return (int) $db->fetchColumn($sql, [$cID]);
 
     }
 }
