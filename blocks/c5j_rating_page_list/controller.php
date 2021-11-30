@@ -7,13 +7,17 @@
 
 namespace Concrete\Package\C5jRatings\Block\C5jRatingPageList;
 
+use C5jRatings\Entity\C5jRating;
 use C5jRatings\Page\PageList;
+use Concrete\Core\Asset\Asset;
+use Concrete\Core\Asset\AssetList;
 use Concrete\Core\Attribute\Key\CollectionKey;
 use Concrete\Core\Page\Page;
 use Concrete\Core\Tree\Node\Node;
 use Concrete\Core\User\User;
 use Core;
 use Database;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 class Controller extends \Concrete\Block\PageList\Controller
 {
@@ -24,6 +28,9 @@ class Controller extends \Concrete\Block\PageList\Controller
 
     /** @var \Concrete\Core\Application\Application */
     protected $app;
+
+    /** @var \Concrete\Core\Validation\CSRF\Token */
+    protected $token;
 
     public function getBlockTypeName(): string
     {
@@ -42,8 +49,16 @@ class Controller extends \Concrete\Block\PageList\Controller
         ];
     }
 
+    public function registerViewAssets($outputContent = '')
+    {
+        $this->requireAsset('css', 'ratings_button');
+    }
+
     public function on_start()
     {
+        $al = AssetList::getInstance();
+        $al->register('css', 'ratings_button', 'css/ratings_button.css', ['position' => Asset::ASSET_POSITION_HEADER], 'c5j_ratings');
+
         $this->list = new PageList();
         $this->list->disableAutomaticSorting();
         $this->list->setNameSpace('b' . $this->bID);
@@ -205,121 +220,68 @@ class Controller extends \Concrete\Block\PageList\Controller
 
     }
 
-    public function save($args)
+    public function action_rate_page(int $bID)
     {
-        // If we've gotten to the process() function for this class, we assume that we're in
-        // the clear, as far as permissions are concerned (since we check permissions at several
-        // points within the dispatcher)
+        $this->token = $this->app->make('helper/validation/token');
+        if ($this->token->validate('rate_page', $this->post('token'))) {
+            $this->addRating($this->post('uID'), $this->post('cID'), $this->post('bID'), $this->post('ratedValue'));
+
+            return JsonResponse::create(['ratings' => $this->getRatingsCount($this->post('uID'), $this->post('cID'), $this->post('filterByUserRated'))]);
+        }
+    }
+
+    public function getRatedValue(int $bID = 0, int $cID = 0): int
+    {
         $db = Database::connection();
+        $u = Core::make(User::class);
+        $uID = $u->getUserID();
+        $sql = 'SELECT ratedValue FROM C5jRatings WHERE cID = ? AND bID = ? AND uID = ?';
+        $params = [$cID, $bID, $uID];
 
-        $bID = $this->bID;
-        $c = $this->getCollectionObject();
-        if (is_object($c)) {
-            $this->cID = $c->getCollectionID();
-            $this->cPID = $c->getCollectionParentID();
+        return (int) $db->fetchColumn($sql, $params);
+    }
+
+    public function getPassThruActionAndParameters($parameters)
+    {
+        if ($parameters[0] == 'rate_page') {
+            $method = 'action_rate_page';
+            $parameters = array_slice($parameters, 1);
         }
 
-        $args += [
-            'enableExternalFiltering' => 0,
-            'includeAllDescendents' => 0,
-            'includeDate' => 0,
-            'truncateSummaries' => 0,
-            'displayFeaturedOnly' => 0,
-            'topicFilter' => '',
-            'displayThumbnail' => 0,
-            'displayAliases' => 0,
-            'truncateChars' => 0,
-            'paginate' => 0,
-            'rss' => 0,
-            'pfID' => 0,
-            'filterDateOption' => '',
-            'cParentID' => null,
-        ];
+        return [$method, $parameters];
+    }
 
-        if (is_numeric($args['cParentID'])) {
-            $args['cParentID'] = (int) ($args['cParentID']);
+    public function isValidControllerTask($method, $parameters = [])
+    {
+        return true;
+    }
+
+    private function addRating(int $uID, int $cID, int $bID, int $ratedValue): C5jRating
+    {
+        $rating = C5jRating::getByBIDAndUID($bID, $uID);
+        if (!$rating) {
+            $rating = new C5jRating();
         }
+        $rating->setBID($bID);
+        $rating->setCID($cID);
+        $rating->setUID($uID);
+        $rating->setRatedValue($ratedValue);
+        $rating->save();
 
-        $args['num'] = ($args['num'] > 0) ? $args['num'] : 0;
-        $args['cThis'] = ($args['cParentID'] === $this->cID) ? '1' : '0';
-        $args['cThisParent'] = ($args['cParentID'] === $this->cPID) ? '1' : '0';
-        $args['cParentID'] = ($args['cParentID'] === 'OTHER') ? (empty($args['cParentIDValue']) ? null : $args['cParentIDValue']) : $args['cParentID'];
-        if (!$args['cParentID']) {
-            $args['cParentID'] = 0;
+        return $rating;
+    }
+
+    private function getRatingsCount(int $uID, int $cID, int $filterByUserRated): int
+    {
+        $db = Database::connection();
+        if($filterByUserRated){
+            $sql = 'SELECT SUM(ratedValue) AS ratings FROM C5jRatings WHERE uID=? and cID=? and ratedValue != 0';
+
+            return (int) $db->fetchColumn($sql, [$uID, $cID]);
         }
-        $args['enableExternalFiltering'] = ($args['enableExternalFiltering']) ? '1' : '0';
-        $args['includeAllDescendents'] = ($args['includeAllDescendents']) ? '1' : '0';
-        $args['includeDate'] = ($args['includeDate']) ? '1' : '0';
-        $args['truncateSummaries'] = ($args['truncateSummaries']) ? '1' : '0';
-        $args['displayFeaturedOnly'] = ($args['displayFeaturedOnly']) ? '1' : '0';
-        $args['filterByRelated'] = ($args['topicFilter'] == 'related') ? '1' : '0';
-        $args['filterByCustomTopic'] = ($args['topicFilter'] == 'custom') ? '1' : '0';
-        $args['displayThumbnail'] = ($args['displayThumbnail']) ? '1' : '0';
-        $args['displayAliases'] = ($args['displayAliases']) ? '1' : '0';
-        $args['truncateChars'] = (int) ($args['truncateChars']);
-        $args['paginate'] = (int) ($args['paginate']);
-        $args['rss'] = (int) ($args['rss']);
-        $args['ptID'] = (int) ($args['ptID']);
+            $sql = 'SELECT SUM(ratedValue) AS ratings FROM C5jRatings WHERE cID=? and ratedValue != 0';
 
-        if (!$args['filterByRelated']) {
-            $args['relatedTopicAttributeKeyHandle'] = '';
-        }
+            return (int) $db->fetchColumn($sql, [$cID]);
 
-        if (!$args['filterByCustomTopic'] || !$this->app->make('helper/number')->isInteger($args['customTopicTreeNodeID'])) {
-            $args['customTopicAttributeKeyHandle'] = '';
-            $args['customTopicTreeNodeID'] = 0;
-        }
-
-        if ($args['rss']) {
-            if (isset($this->pfID) && $this->pfID) {
-                $pf = Feed::getByID($this->pfID);
-            }
-
-            if (!is_object($pf)) {
-                $pf = new \Concrete\Core\Entity\Page\Feed();
-                $pf->setTitle($args['rssTitle']);
-                $pf->setDescription($args['rssDescription']);
-                $pf->setHandle($args['rssHandle']);
-            }
-
-            $pf->setParentID($args['cParentID']);
-            $pf->setPageTypeID($args['ptID']);
-            $pf->setIncludeAllDescendents($args['includeAllDescendents']);
-            $pf->setDisplayAliases($args['displayAliases']);
-            $pf->setDisplayFeaturedOnly($args['displayFeaturedOnly']);
-            $pf->setDisplayAliases($args['displayAliases']);
-            $pf->displayShortDescriptionContent();
-            $pf->save();
-            $args['pfID'] = $pf->getID();
-        } elseif (isset($this->pfID) && $this->pfID && !$args['rss']) {
-            // let's make sure this isn't in use elsewhere.
-            $cnt = $db->fetchColumn('select count(pfID) from btPageList where pfID = ?', [$this->pfID]);
-            if ($cnt == 1) { // this is the last one, so we delete
-                $pf = Feed::getByID($this->pfID);
-                if (is_object($pf)) {
-                    $pf->delete();
-                }
-            }
-            $args['pfID'] = 0;
-        }
-
-        if ($args['filterDateOption'] != 'between') {
-            $args['filterDateStart'] = null;
-            $args['filterDateEnd'] = null;
-        }
-
-        if ($args['filterDateOption'] == 'past') {
-            $args['filterDateDays'] = $args['filterDatePast'];
-        } elseif ($args['filterDateOption'] == 'future') {
-            $args['filterDateDays'] = $args['filterDateFuture'];
-        } else {
-            $args['filterDateDays'] = null;
-        }
-
-        $args['filterByUserRated'] = isset($args['filterByUserRated']) ? $args['filterByUserRated'] : 0;
-        $args['miniNumOfRatings'] = isset($args['miniNumOfRatings']) ? $args['miniNumOfRatings'] : 0;
-
-        $args['pfID'] = (int) ($args['pfID']);
-        parent::save($args);
     }
 }
