@@ -238,6 +238,21 @@ class Controller extends \Concrete\Block\PageList\Controller
         if ($parameters[0] == 'rate_page') {
             $method = 'action_rate_page';
             $parameters = array_slice($parameters, 1);
+        }else if ($parameters[0] == 'topic') {
+            $method = 'action_filter_by_topic';
+            $parameters = array_slice($parameters, 1);
+        } elseif ($parameters[0] == 'tag') {
+            $method = 'action_filter_by_tag';
+            $parameters = array_slice($parameters, 1);
+        } elseif (Core::make('helper/validation/numbers')->integer($parameters[0])) {
+            // then we're going to treat this as a year.
+            $method = 'action_filter_by_date';
+            $parameters[0] = (int) ($parameters[0]);
+            if (isset($parameters[1])) {
+                $parameters[1] = (int) ($parameters[1]);
+            }
+        } else {
+            $parameters = $method = null;
         }
 
         return [$method, $parameters];
@@ -245,6 +260,19 @@ class Controller extends \Concrete\Block\PageList\Controller
 
     public function isValidControllerTask($method, $parameters = [])
     {
+        if ($method === 'action_filter_by_date') {
+            // Parameter 0 must be set
+            if (!isset($parameters[0]) || $parameters[0] < 0 || $parameters[0] > 9999) {
+                return false;
+            }
+            // Parameter 1 can be null
+            if (isset($parameters[1])) {
+                if ($parameters[1] < 1 || $parameters[1] > 12) {
+                    return false;
+                }
+            }
+        }
+
         return true;
     }
 
