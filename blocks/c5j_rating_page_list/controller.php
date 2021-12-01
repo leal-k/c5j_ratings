@@ -51,12 +51,14 @@ class Controller extends \Concrete\Block\PageList\Controller
 
     public function registerViewAssets($outputContent = '')
     {
+        $this->requireAsset('javascript', 'client');
         $this->requireAsset('css', 'ratings_button');
     }
 
     public function on_start()
     {
         $al = AssetList::getInstance();
+        $al->register('javascript', 'client', 'js/client.min.js', ['position' => Asset::ASSET_POSITION_HEADER], 'c5j_ratings');
         $al->register('css', 'ratings_button', 'css/ratings_button.css', ['position' => Asset::ASSET_POSITION_HEADER], 'c5j_ratings');
 
         $this->list = new PageList();
