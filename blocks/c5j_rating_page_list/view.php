@@ -115,7 +115,7 @@ if (is_object($c) && $c->isEditMode() && $controller->isBlockEmpty()) {
                                             $active = $controller->getRatedValue($page['cID']) === 1 ? $btnType . '-active' : '';
                                         ?>
                                         <div>
-                                            <span class="<?= $btnType ?>-btn <?= $active ?>" id="btn-<?= $page['cID'] ?>" onclick="isRatedBy(<?= $page['cID'] ?>)"></span>
+                                            <span class="<?= $btnType ?>-btn <?= $active ?>" id="btn-<?= $page['cID'] ?>" onclick="isPageRatedBy(<?= $page['cID'] ?>)"></span>
                                                 <span class="ratings-<?= $page['cID'] ?>" id="<?=$btnType?>"><?= $page['ratings'] ?? 0 ?></span>
                                         </div>
                                         <?php
@@ -171,7 +171,7 @@ if (is_object($c) && $c->isEditMode() && $controller->isBlockEmpty()) {
 
 } ?>
 <script>
-    function isRatedBy(cID) {
+    function isPageRatedBy(cID) {
         let uID = getUserID();
         let btnType = $(".ratings-"+cID).attr("id");
         let ratedValue = 1;
@@ -179,7 +179,7 @@ if (is_object($c) && $c->isEditMode() && $controller->isBlockEmpty()) {
             ratedValue = 0;
         }
 
-        rateIt(uID, cID, ratedValue, btnType);
+        pageRateIt(uID, cID, ratedValue, btnType);
     }
 
     function getUserID() {
@@ -192,7 +192,7 @@ if (is_object($c) && $c->isEditMode() && $controller->isBlockEmpty()) {
         return uID;
     }
 
-    function rateIt(uID, cID, ratedValue, btnType) {
+    function pageRateIt(uID, cID, ratedValue, btnType) {
         $.ajax({
             url: "<?= $view->action('rate_page')?>",
             type: 'post',
