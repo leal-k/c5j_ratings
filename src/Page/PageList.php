@@ -6,17 +6,16 @@
 
 namespace C5jRatings\Page;
 use Doctrine\DBAL\Types\Type;
-use Pagerfanta\Adapter\DoctrineDbalAdapter;
 
 class PageList extends \Concrete\Core\Page\PageList
 {
     public function __construct()
     {
         parent::__construct();
-        $this->query->leftJoin('p', 'C5jRatings', 'r', 'p.cID = r.cID and r.ratedValue = 1');
+        $this->query->leftJoin('p', 'C5jRatings', 'r', 'p.cID = r.cID');
         $this->query->addSelect('SUM(r.ratedValue) AS ratings');
         $this->query->addSelect('r.bID');
-        $this->query->addGroupBy('r.cID');
+        $this->query->addGroupBy('p.cID');
 
     }
 
@@ -39,17 +38,5 @@ class PageList extends \Concrete\Core\Page\PageList
     public function getResult($queryRow)
     {
         return $queryRow;
-    }
-
-    public function getPaginationAdapter()
-    {
-        $adapter = new DoctrineDbalAdapter($this->deliverQueryObject(), function ($query) {
-            // We need to reset the potential custom order by here because otherwise, if we've added
-            // items to the select parts, and we're ordering by them, we get a SQL error
-            // when we get total results, because we're resetting the select
-           $query->resetQueryParts(['orderBy'])->select('count(distinct p.cID)')->setMaxResults(1);
-        });
-
-        return $adapter;
     }
 }

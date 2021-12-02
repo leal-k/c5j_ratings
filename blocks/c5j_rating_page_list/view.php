@@ -12,7 +12,7 @@ $dh = Core::make('helper/date');
 
 if (is_object($c) && $c->isEditMode() && $controller->isBlockEmpty()) {
     ?>
-    <div class="ccm-edit-mode-disabled-item"><?php echo t('Empty Page List Block.') ?></div>
+    <div class="ccm-edit-mode-disabled-item"><?php echo t('Empty C5j Rating Page List Block.') ?></div>
     <?php
 } else {
     ?>
@@ -108,19 +108,20 @@ if (is_object($c) && $c->isEditMode() && $controller->isBlockEmpty()) {
 
                                     } ?>
                                     <?php
-                                    if(isset($page['bID'])){
-                                        $controller = new Concrete\Package\C5jRatings\Block\C5jRatingPageList\Controller();
-                                        $btnType = $controller->getbtnType($page['bID']);
+                                    $displayRatings = $displayRatings ?? "";
+                                    $btnType = $btnType ?? "";
+                                    if($displayRatings){
                                         if($btnType){
-                                    ?>
-                                    <div>
-                                        <span class="<?= $btnType ?>-btn"></span><?= $page['ratings'] ?? 0 ?>
-                                    </div>
-                                        <?php
-                                        }
-                                    }
+                                            $active = $controller->getRatedValue($page['cID']) === 1 ? $btnType . '-active' : '';
                                         ?>
-                                </div>
+                                        <div>
+                                            <span class="<?= $btnType ?>-btn <?= $active ?>" id="btn-<?= $page['cID'] ?>" onclick="isPageRatedBy(<?= $page['cID'] ?>)"></span>
+                                                <span class="ratings-<?= $page['cID'] ?>" id="<?=$btnType?>"><?= $page['ratings'] ?? 0 ?></span>
+                                        </div>
+                                        <?php
+                                             }
+                                        }
+                                        ?>
                                 <?php
                             } ?>
 
@@ -169,3 +170,50 @@ if (is_object($c) && $c->isEditMode() && $controller->isBlockEmpty()) {
     <?php
 
 } ?>
+<script>
+    function isPageRatedBy(cID) {
+        let uID = getUserID();
+        let btnType = $(".ratings-"+cID).attr("id");
+        let ratedValue = 1;
+        if($("#btn-"+cID).hasClass(btnType+"-active")) {
+            ratedValue = 0;
+        }
+
+        pageRateIt(uID, cID, ratedValue, btnType);
+    }
+
+    function getUserID() {
+        let uID = "<?= Core::make('user')->getUserID() ?>";
+        if (!uID) {
+            const client = new ClientJS();
+            uID = client.getFingerprint();
+        }
+
+        return uID;
+    }
+
+    function pageRateIt(uID, cID, ratedValue, btnType) {
+        $.ajax({
+            url: "<?= $view->action('rate_page')?>",
+            type: 'post',
+            data: {
+                token: "<?= Core::make('token')->generate('rate_page') ?>",
+                uID: uID,
+                cID: cID,
+                ratedValue: ratedValue
+            },
+            success: function(data) {
+                $(".ratings-"+cID).text(data['ratings']);
+                if(ratedValue === 0){
+                    $("#btn-"+cID).removeClass(btnType+"-active");
+                }else{
+                    $("#btn-"+cID).addClass(btnType+"-active");
+                }
+            }
+        });
+
+
+    }
+
+
+</script>

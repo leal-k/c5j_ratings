@@ -10,8 +10,6 @@ namespace Concrete\Package\C5jRatings\Block\C5jRatingBtn;
 
 use C5jRatings\Entity\C5jRating;
 use Carbon\Carbon;
-use Concrete\Core\Asset\Asset;
-use Concrete\Core\Asset\AssetList;
 use Concrete\Core\Block\BlockController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
@@ -38,13 +36,12 @@ class Controller extends BlockController
         $this->db = $this->app->make('database/connection');
         $this->token = $this->app->make('helper/validation/token');
         $this->set('token', $this->token);
-        $al = AssetList::getInstance();
-        $al->register('javascript', 'client', 'js/client.min.js', ['position' => Asset::ASSET_POSITION_HEADER], 'c5j_ratings');
     }
 
     public function registerViewAssets($outputContent = '')
     {
         $this->requireAsset('javascript', 'client');
+        $this->requireAsset('css', 'ratings_button');
     }
 
     public function view()
