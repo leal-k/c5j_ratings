@@ -6,25 +6,28 @@
  *
  * @license MIT
  */
+
 namespace Concrete\Package\C5jRatings;
 
+use Concrete\Core\Asset\Asset;
+use Concrete\Core\Asset\AssetList;
 use Concrete\Core\Backup\ContentImporter;
 use Concrete\Core\Package\Package;
 
 class Controller extends Package
 {
     /**
-     * @var string Package handle.
+     * @var string package handle
      */
     protected $pkgHandle = 'c5j_ratings';
 
     /**
-     * @var string Required concrete5 version.
+     * @var string required concrete5 version
      */
     protected $appVersionRequired = '8.1.0';
 
     /**
-     * @var string Package version.
+     * @var string package version
      */
     protected $pkgVersion = '0.1.0-a';
 
@@ -64,6 +67,17 @@ class Controller extends Package
     {
         parent::upgrade();
         $this->installXml();
+    }
+
+    public function on_start()
+    {
+        $al = AssetList::getInstance();
+        $al->register(
+            'javascript', 'client', 'js/client.min.js', ['position' => Asset::ASSET_POSITION_HEADER], 'c5j_ratings'
+        );
+        $al->register(
+            'css', 'ratings_button', 'css/ratings_button.css', ['position' => Asset::ASSET_POSITION_HEADER], 'c5j_ratings'
+        );
     }
 
     private function installXml(): void

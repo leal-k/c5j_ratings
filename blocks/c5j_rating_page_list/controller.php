@@ -9,8 +9,6 @@ namespace Concrete\Package\C5jRatings\Block\C5jRatingPageList;
 
 use C5jRatings\Entity\C5jRating;
 use C5jRatings\Page\PageList;
-use Concrete\Core\Asset\Asset;
-use Concrete\Core\Asset\AssetList;
 use Concrete\Core\Attribute\Key\CollectionKey;
 use Concrete\Core\Page\Page;
 use Concrete\Core\Tree\Node\Node;
@@ -57,10 +55,6 @@ class Controller extends \Concrete\Block\PageList\Controller
 
     public function on_start()
     {
-        $al = AssetList::getInstance();
-        $al->register('javascript', 'client', 'js/client.min.js', ['position' => Asset::ASSET_POSITION_HEADER], 'c5j_ratings');
-        $al->register('css', 'ratings_button', 'css/ratings_button.css', ['position' => Asset::ASSET_POSITION_HEADER], 'c5j_ratings');
-
         $this->list = new PageList();
         $this->list->disableAutomaticSorting();
         $this->list->setNameSpace('b' . $this->bID);
@@ -224,8 +218,8 @@ class Controller extends \Concrete\Block\PageList\Controller
 
     public function getRatedValue(int $cID = 0): int
     {
-        $db = Database::connection();
-        $u = Core::make(User::class);
+        $db = $this->app->make('database/connection');
+        $u = $this->app->make('user');
         $uID = $u->getUserID();
         $sql = 'SELECT ratedValue FROM C5jRatings WHERE cID = ? AND uID = ?';
         $params = [$cID, $uID];
@@ -293,7 +287,7 @@ class Controller extends \Concrete\Block\PageList\Controller
 
     private function getRatingsCount(int $uID, int $cID): int
     {
-        $db = Database::connection();
+        $db = $this->app->make('database/connection');
         $sql = 'SELECT SUM(ratedValue) AS ratings FROM C5jRatings WHERE cID=? and ratedValue != 0';
 
         return (int) $db->fetchColumn($sql, [$cID]);
