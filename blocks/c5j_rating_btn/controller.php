@@ -51,10 +51,14 @@ class Controller extends BlockController
 
     private function getRatingsCount(): int
     {
-        // TODO::Use entity
-        $sql = 'SELECT SUM(ratedValue) AS ratings FROM C5jRatings WHERE bID=?';
+        $u = $this->app->make('user');
+        $uID = $u->getUserID();
+        $c = \Page::getCurrentPage();
 
-        return (int) $this->db->fetchColumn($sql, [$this->bID]);
+        $sql = 'SELECT ratedValue FROM C5jRatings WHERE cID = ? AND uID = ?';
+        $params = [$c->getCollectionID(), $uID];
+
+        return (int) $this->db->fetchColumn($sql, $params);
     }
 
     public function action_rate(int $bID)
@@ -69,7 +73,7 @@ class Controller extends BlockController
 
     private function addRating($uID, $ratedValue): C5jRating
     {
-        $rating = C5jRating::getByBIDAndUID($this->bID, $uID);
+        $rating = C5jRating::getByCIDAndUID($this->getRequest()->getCurrentPage()->getCollectionID(), $uID);
         if (!$rating) {
             $rating = new C5jRating();
         }
