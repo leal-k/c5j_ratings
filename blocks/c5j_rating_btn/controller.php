@@ -51,12 +51,10 @@ class Controller extends BlockController
 
     private function getRatingsCount(): int
     {
-        $u = $this->app->make('user');
-        $uID = $u->getUserID();
         $c = \Page::getCurrentPage();
 
-        $sql = 'SELECT ratedValue FROM C5jRatings WHERE cID = ? AND uID = ?';
-        $params = [$c->getCollectionID(), $uID];
+        $sql = 'SELECT SUM(ratedValue) AS ratings FROM C5jRatings WHERE cID = ? and ratedValue != 0';
+        $params = [$c->getCollectionID()];
 
         return (int) $this->db->fetchColumn($sql, $params);
     }
@@ -96,8 +94,8 @@ class Controller extends BlockController
     private function isRatedBy(int $uID): bool
     {
         // TODO::Use entity
-        $sql = "SELECT ratedValue FROM C5jRatings WHERE bID = ? AND uID = ?";
-        $params = [$this->bID, $uID];
+        $sql = 'SELECT ratedValue AS ratings FROM C5jRatings WHERE cID = ? AND uID = ? and ratedValue != 0';
+        $params = [$this->getRequest()->getCurrentPage()->getCollectionID(), $uID];
 
         return (bool) $this->db->fetchColumn($sql, $params);
     }
