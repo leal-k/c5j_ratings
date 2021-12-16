@@ -51,7 +51,7 @@ class Controller extends BlockController
 
     private function getRatingsCount(): int
     {
-        $c = \Page::getCurrentPage();
+        $c = $this->getRequest()->getCurrentPage();
 
         $sql = 'SELECT SUM(ratedValue) AS ratings FROM C5jRatings WHERE cID = ? and ratedValue != 0';
         $params = [$c->getCollectionID()];

@@ -3,12 +3,12 @@ defined('C5_EXECUTE') or die('Access Denied.');
 
 // TODO::Display the rating button on view
 
-$c = Page::getCurrentPage();
-
+$c = $this->controller->getRequest()->getCurrentPage();
+$app = \Concrete\Core\Support\Facade\Application::getFacadeApplication();
 /** @var \Concrete\Core\Utility\Service\Text $th */
-$th = Core::make('helper/text');
+$th = $app->make('helper/text');
 /** @var \Concrete\Core\Localization\Service\Date $dh */
-$dh = Core::make('helper/date');
+$dh = $app->make('helper/date');
 
 if (is_object($c) && $c->isEditMode() && $controller->isBlockEmpty()) {
     ?>
@@ -80,7 +80,7 @@ if (is_object($c) && $c->isEditMode() && $controller->isBlockEmpty()) {
                         ?>
                         <div class="ccm-block-page-list-page-entry-thumbnail">
                             <?php
-                            $img = Core::make('html/image', [$thumbnail]);
+                            $img = $app->make('html/image', [$thumbnail]);
                             $tag = $img->getTag();
                             $tag->addClass('img-responsive');
                             echo $tag; ?>
@@ -183,7 +183,7 @@ if (is_object($c) && $c->isEditMode() && $controller->isBlockEmpty()) {
                 url: "<?= URL::to($view->action('is_rated_page')) ?>",
                 type: 'post',
                 data: {
-                    token: "<?= Core::make('token')->generate('is_rated_page') ?>",
+                    token: "<?= $app->make('token')->generate('is_rated_page') ?>",
                     cID: cID,
                     uID: uID,
                 },
@@ -212,7 +212,7 @@ if (is_object($c) && $c->isEditMode() && $controller->isBlockEmpty()) {
     }
 
     function getUserID() {
-        let uID = "<?= Core::make('user')->getUserID() ?>";
+        let uID = "<?= $app->make('user')->getUserID() ?>";
         if (!uID) {
             const client = new ClientJS();
             uID = client.getFingerprint();
@@ -226,7 +226,7 @@ if (is_object($c) && $c->isEditMode() && $controller->isBlockEmpty()) {
             url: "<?= $view->action('rate_page')?>",
             type: 'post',
             data: {
-                token: "<?= Core::make('token')->generate('rate_page') ?>",
+                token: "<?= $app->make('token')->generate('rate_page') ?>",
                 uID: uID,
                 cID: cID,
                 ratedValue: ratedValue

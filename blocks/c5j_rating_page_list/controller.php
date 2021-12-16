@@ -135,7 +135,7 @@ class Controller extends \Concrete\Block\PageList\Controller
             $this->list->filterByPublicDate($end, '<=');
         }
 
-        $c = Page::getCurrentPage();
+        $c = $this->getRequest()->getCurrentPage();
         if (is_object($c)) {
             $this->cID = $c->getCollectionID();
             $this->cPID = $c->getCollectionParentID();
