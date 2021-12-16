@@ -1,5 +1,6 @@
 <?php defined('C5_EXECUTE') or die('Access Denied.');
-$c = Page::getCurrentPage();
+$app = \Concrete\Core\Support\Facade\Application::getFacadeApplication();
+$c = $this->controller->getRequest()->getCurrentPage();
 $siteType = null;
 if ($c) {
     $pageType = $c->getPageTypeObject();
@@ -12,10 +13,10 @@ if ($c) {
         }
     }
 }
-$form = Loader::helper('form/page_selector');
+$form = $app->make('helper/form/page_selector');
 ?>
 
-<?=Loader::helper('concrete/ui')->tabs([
+<?=$app->make('helper/concrete/ui')->tabs([
     ['page-list-settings', t('Settings'), true],
     ['page-list-preview', t('Preview')],
 ]); ?>

@@ -51,10 +51,12 @@ class Controller extends BlockController
 
     private function getRatingsCount(): int
     {
-        // TODO::Use entity
-        $sql = 'SELECT SUM(ratedValue) AS ratings FROM C5jRatings WHERE bID=?';
+        $c = $this->getRequest()->getCurrentPage();
 
-        return (int) $this->db->fetchColumn($sql, [$this->bID]);
+        $sql = 'SELECT SUM(ratedValue) AS ratings FROM C5jRatings WHERE cID = ? and ratedValue != 0';
+        $params = [$c->getCollectionID()];
+
+        return (int) $this->db->fetchColumn($sql, $params);
     }
 
     public function action_rate(int $bID)
@@ -69,7 +71,7 @@ class Controller extends BlockController
 
     private function addRating($uID, $ratedValue): C5jRating
     {
-        $rating = C5jRating::getByBIDAndUID($this->bID, $uID);
+        $rating = C5jRating::getByCIDAndUID($this->getRequest()->getCurrentPage()->getCollectionID(), $uID);
         if (!$rating) {
             $rating = new C5jRating();
         }
@@ -92,8 +94,8 @@ class Controller extends BlockController
     private function isRatedBy(int $uID): bool
     {
         // TODO::Use entity
-        $sql = "SELECT ratedValue FROM C5jRatings WHERE bID = ? AND uID = ?";
-        $params = [$this->bID, $uID];
+        $sql = 'SELECT ratedValue AS ratings FROM C5jRatings WHERE cID = ? AND uID = ? and ratedValue != 0';
+        $params = [$this->getRequest()->getCurrentPage()->getCollectionID(), $uID];
 
         return (bool) $this->db->fetchColumn($sql, $params);
     }
