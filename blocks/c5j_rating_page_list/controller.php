@@ -216,13 +216,19 @@ class Controller extends \Concrete\Block\PageList\Controller
         }
     }
 
-    public function getRatedValue(int $cID = 0): int
+    public function action_is_rated_page(int $bID)
+    {
+        $this->token = $this->app->make('helper/validation/token');
+        if ($this->token->validate('is_rated_page', $this->post('token'))) {
+            return JsonResponse::create(['isRatedPage' => $this->isRatedBy($this->post('cID'),$this->post('uID'))]);
+        }
+    }
+
+    public function isRatedBy(int $cID,int $uID): bool
     {
         $db = $this->app->make('database/connection');
-        $u = $this->app->make('user');
-        $uID = $u->getUserID();
-        $sql = 'SELECT ratedValue FROM C5jRatings WHERE cID = ? AND uID = ?';
-        $params = [$cID, $uID];
+        $sql = 'SELECT ratedValue FROM C5jRatings WHERE cID = ? and uID = ? and ratedValue != 0';
+        $params = [$cID,$uID];
 
         return (int) $db->fetchColumn($sql, $params);
     }
@@ -232,10 +238,10 @@ class Controller extends \Concrete\Block\PageList\Controller
         if ($parameters[0] == 'rate_page') {
             $method = 'action_rate_page';
             $parameters = array_slice($parameters, 1);
-        }else if ($parameters[0] == 'topic') {
-            $method = 'action_filter_by_topic';
+        }else if ($parameters[0] == 'is_rated_page') {
+            $method = 'action_is_rated_page';
             $parameters = array_slice($parameters, 1);
-        } elseif ($parameters[0] == 'tag') {
+        }elseif ($parameters[0] == 'tag') {
             $method = 'action_filter_by_tag';
             $parameters = array_slice($parameters, 1);
         } elseif (Core::make('helper/validation/numbers')->integer($parameters[0])) {

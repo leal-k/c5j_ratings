@@ -112,13 +112,13 @@ if (is_object($c) && $c->isEditMode() && $controller->isBlockEmpty()) {
                                     $btnType = $btnType ?? "";
                                     if($displayRatings){
                                         if($btnType){
-                                            $active = $controller->getRatedValue($page['cID']) === 1 ? $btnType . '-active' : '';
                                         ?>
                                         <div>
-                                            <span class="<?= $btnType ?>-btn <?= $active ?>" id="btn-<?= $page['cID'] ?>" onclick="isPageRatedBy(<?= $page['cID'] ?>)"></span>
+                                            <span class="<?= $btnType ?>-btn" id="btn-<?= $page['cID'] ?>" onclick="isPageRatedBy(<?= $page['cID'] ?>)"></span>
                                                 <span class="ratings-<?= $page['cID'] ?>" id="<?=$btnType?>"><?= $page['ratings'] ?? 0 ?></span>
                                         </div>
-                                        <?php
+                                        <input type="hidden" name="pageIDs[]" value="<?= $page['cID'] ?>">
+                                            <?php
                                              }
                                         }
                                         ?>
@@ -171,6 +171,35 @@ if (is_object($c) && $c->isEditMode() && $controller->isBlockEmpty()) {
 
 } ?>
 <script>
+    $(document).ready(function () {
+
+        $('input[name^="pageIDs"]').each( function(key,value) {
+            let uID = getUserID();
+            isRatedBy(this.value,uID);
+        });
+        function isRatedBy(cID,uID) {
+            let isRated = false;
+            $.ajax({
+                url: "<?= URL::to($view->action('is_rated_page')) ?>",
+                type: 'post',
+                data: {
+                    token: "<?= Core::make('token')->generate('is_rated_page') ?>",
+                    cID: cID,
+                    uID: uID,
+                },
+                success: function (data) {
+                    isRated = data['isRatedPage'];
+                    if(data['isRatedPage']){
+                        let btnType = $(".ratings-"+cID).attr("id");
+                        $("#btn-"+cID).addClass(btnType+"-active");
+                    }
+
+                }
+            });
+
+        }
+    });
+
     function isPageRatedBy(cID) {
         let uID = getUserID();
         let btnType = $(".ratings-"+cID).attr("id");
