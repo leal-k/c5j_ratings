@@ -1,8 +1,8 @@
-.ratings {
-    position: absolute;
-    top: 30%;
-    font-size: x-large;
-}
+/*.ratings {*/
+/*    position: absolute;*/
+/*    top: 30%;*/
+/*    font-size: x-large;*/
+/*}*/
 .clap-btn,
 .heart-btn,
 .like-btn {
@@ -13,17 +13,17 @@
 }
 
 .clap-btn {
-    background: url('../../images/claps.png') no-repeat 0% 50%;
+    background: url('../images/claps.png') no-repeat 0% 50%;
     background-size: 900%;
 }
 
 .heart-btn {
-    background: url('../../images/heart.png') no-repeat 0% 50%;
+    background: url('../images/heart.png') no-repeat 0% 50%;
     background-size: 2900%;
 }
 
 .like-btn {
-    background: url('../../images/like.png') no-repeat 0% 50%;
+    background: url('../images/like.png') no-repeat 0% 50%;
     background-size: 200%;
 }
 

@@ -1,11 +1,13 @@
 <?xml version="1.0"?>
 <concrete5-cif version="1.0">
     <blocktypes>
-        <blocktype handle="c5j_ratings" package="c5j_ratings"/>
+        <blocktype handle="c5j_rating_btn" package="c5j_ratings"/>
+        <blocktype handle="c5j_rating_page_list" package="c5j_ratings"/>
     </blocktypes>
     <blocktypesets>
-        <blocktypeset handle="social" name="Social Networking" package="">
-            <blocktype handle="c5j_ratings"/>
+        <blocktypeset handle="c5j" name="concrete5 Japan" package="c5j_ratings">
+            <blocktype handle="c5j_rating_btn"/>
+            <blocktype handle="c5j_rating_page_list"/>
         </blocktypeset>
     </blocktypesets>
 </concrete5-cif>
