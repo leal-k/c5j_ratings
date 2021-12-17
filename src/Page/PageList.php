@@ -21,7 +21,7 @@ class PageList extends \Concrete\Core\Page\PageList
 
     public function filterByUserRated(int $uID): void
     {
-        $this->query->andWhere('r.uID = :uID');
+        $this->query->andWhere($this->query->expr()->in('p.cID', 'Select cID from c5jRatings where uID = :uID'));
         $this->query->setParameter('uID', $uID, Type::INTEGER);
     }
 
