@@ -7,9 +7,9 @@ $btnType = $btnType ?? 'clap';
 ?>
 
 <div>
-    <span class="<?= $btnType ?>-btn"></span>
+    <span class="<?= $btnType ?>-btn <?= $bID ?>"></span>
     <?php if ($displayRatings): ?>
-        <span class="ratings" id="<?= $bID ?>"><?= $ratings ?? 0 ?></span>
+        <span class="ratings" id="<?= $bID ?>"></span>
     <?php endif; ?>
 </div>
 
@@ -19,12 +19,13 @@ $btnType = $btnType ?? 'clap';
         let uID = getUserID();
         let $el = $('.<?= $btnType ?>-btn');
         let activeClass = '<?= $btnType ?>-active';
-        $el.toggleClass(activeClass, isRatedBy(uID))
+        let bID = $el.siblings(".ratings").attr("id");
+        $el.toggleClass(activeClass, isRatedBy(uID,bID));
 
         $($el).on('click', function() {
             $el.toggleClass(activeClass);
             const value = $el.hasClass(activeClass) ? 1 : 0;
-            rateIt(uID, value);
+            rateIt(uID, value ,bID);
         });
     });
 
@@ -38,22 +39,23 @@ $btnType = $btnType ?? 'clap';
         return uID;
     }
 
-    function rateIt(uID, value) {
+    function rateIt(uID, value, bID) {
         $.ajax({
             url: "<?= URL::to($view->action('rate')) ?>",
             type: 'post',
             data: {
                 token: "<?= Core::make('token')->generate('rate') ?>",
                 uID: uID,
-                ratedValue: value
+                ratedValue: value,
+                bID: bID
             },
             success: function(data) {
-                $("#<?= $bID ?>").text(data['ratings']);
+                $("#"+bID).text(data['ratings']);
             }
         });
     }
 
-    function isRatedBy(uID) {
+    function isRatedBy(uID,bID) {
         let isRated = false;
         $.ajax({
             url: "<?= URL::to($view->action('is_rated')) ?>",
@@ -62,9 +64,11 @@ $btnType = $btnType ?? 'clap';
             data: {
                 token: "<?= Core::make('token')->generate('is_rated') ?>",
                 uID: uID,
+                bID: bID,
             },
             success: function(data) {
                 isRated = data['isRated'];
+                $("#"+bID).text(data['ratings']);
             }
         });
 

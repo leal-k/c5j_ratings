@@ -46,15 +46,14 @@ class Controller extends BlockController
 
     public function view()
     {
-        $this->set('ratings', $this->getRatingsCount());
     }
 
-    private function getRatingsCount(): int
+    private function getRatingsCount(int $bID): int
     {
         $c = $this->getRequest()->getCurrentPage();
 
-        $sql = 'SELECT SUM(ratedValue) AS ratings FROM C5jRatings WHERE cID = ? and ratedValue != 0';
-        $params = [$c->getCollectionID()];
+        $sql = 'SELECT SUM(ratedValue) AS ratings FROM C5jRatings WHERE cID = ? and bID = ? and ratedValue != 0';
+        $params = [$c->getCollectionID(),$bID];
 
         return (int) $this->db->fetchColumn($sql, $params);
     }
@@ -63,19 +62,19 @@ class Controller extends BlockController
     {
         $this->token = $this->app->make('helper/validation/token');
         if ($this->token->validate('rate', $this->post('token'))) {
-            $this->addRating($this->post('uID'), $this->post('ratedValue'));
+            $this->addRating($this->post('uID'), $this->post('ratedValue'), $this->post('bID'));
 
-            return JsonResponse::create(['ratings' => $this->getRatingsCount()]);
+            return JsonResponse::create(['ratings' => $this->getRatingsCount($this->post('bID'))]);
         }
     }
 
-    private function addRating($uID, $ratedValue): C5jRating
+    private function addRating($uID, $ratedValue, $bID): C5jRating
     {
-        $rating = C5jRating::getByCIDAndUID($this->getRequest()->getCurrentPage()->getCollectionID(), $uID);
+        $rating = C5jRating::getByCIDAndUIDAndBID($this->getRequest()->getCurrentPage()->getCollectionID(), $uID, $bID);
         if (!$rating) {
             $rating = new C5jRating();
         }
-        $rating->setBID($this->bID);
+        $rating->setBID($bID);
         $rating->setCID($this->getRequest()->getCurrentPage()->getCollectionID());
         $rating->setUID($uID);
         $rating->setRatedValue($ratedValue);
@@ -87,15 +86,16 @@ class Controller extends BlockController
     public function action_is_rated(int $bID)
     {
         if ($this->token->validate('is_rated', $this->post('token'))) {
-            return JsonResponse::create(['isRated' => $this->isRatedBy($this->post('uID'))]);
+            return JsonResponse::create([
+                'isRated' => $this->isRatedBy($this->post('uID'),$this->post('bID')),
+                'ratings' => $this->getRatingsCount($this->post('bID'))]);
         }
     }
 
-    private function isRatedBy(int $uID): bool
+    private function isRatedBy(int $uID,int $bID): bool
     {
-        // TODO::Use entity
-        $sql = 'SELECT ratedValue AS ratings FROM C5jRatings WHERE cID = ? AND uID = ? and ratedValue != 0';
-        $params = [$this->getRequest()->getCurrentPage()->getCollectionID(), $uID];
+        $sql = 'SELECT ratedValue AS ratings FROM C5jRatings WHERE cID = ? AND uID = ? AND bID = ? and ratedValue != 0';
+        $params = [$this->getRequest()->getCurrentPage()->getCollectionID(), $uID, $bID];
 
         return (bool) $this->db->fetchColumn($sql, $params);
     }
