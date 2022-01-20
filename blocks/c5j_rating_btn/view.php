@@ -7,25 +7,24 @@ $btnType = $btnType ?? 'clap';
 ?>
 
 <div>
-    <span class="<?= $btnType ?>-btn <?= $bID ?>"></span>
+    <span class="<?= $btnType ?>-btn"></span>
     <?php if ($displayRatings): ?>
         <span class="ratings" id="<?= $bID ?>"></span>
     <?php endif; ?>
+    <input type="hidden" name="<?= $bID ?>" value="<?= $btnType ?>">
 </div>
 
 
 <script>
     $(document).ready(function () {
         let uID = getUserID();
+        isRatedBy(uID);
         let $el = $('.<?= $btnType ?>-btn');
         let activeClass = '<?= $btnType ?>-active';
-        let bID = $el.siblings(".ratings").attr("id");
-        $el.toggleClass(activeClass, isRatedBy(uID,bID));
 
         $($el).on('click', function() {
-            $el.toggleClass(activeClass);
-            const value = $el.hasClass(activeClass) ? 1 : 0;
-            rateIt(uID, value ,bID);
+            const value = $el.hasClass(activeClass) ? 0 : 1;
+            rateIt(uID, value);
         });
     });
 
@@ -39,23 +38,31 @@ $btnType = $btnType ?? 'clap';
         return uID;
     }
 
-    function rateIt(uID, value, bID) {
+    function rateIt(uID, value) {
         $.ajax({
             url: "<?= URL::to($view->action('rate')) ?>",
             type: 'post',
             data: {
                 token: "<?= Core::make('token')->generate('rate') ?>",
                 uID: uID,
-                ratedValue: value,
-                bID: bID
+                ratedValue: value
             },
             success: function(data) {
-                $("#"+bID).text(data['ratings']);
+                $('.ratings').each(function() {
+                    $(this).text(data['ratings']);
+                    let bID = $(this).attr("id");
+                    let btnType = $('input[name='+bID+']').val();
+                    if(parseInt(value) === 1){
+                        $(this).siblings("."+btnType+"-btn").addClass(btnType+"-active");
+                    }else{
+                        $(this).siblings("."+btnType+"-btn").removeClass(btnType+"-active");
+                    }
+                });
             }
         });
     }
 
-    function isRatedBy(uID,bID) {
+    function isRatedBy(uID) {
         let isRated = false;
         $.ajax({
             url: "<?= URL::to($view->action('is_rated')) ?>",
@@ -64,14 +71,20 @@ $btnType = $btnType ?? 'clap';
             data: {
                 token: "<?= Core::make('token')->generate('is_rated') ?>",
                 uID: uID,
-                bID: bID,
             },
             success: function(data) {
                 isRated = data['isRated'];
-                $("#"+bID).text(data['ratings']);
+                $('.ratings').each(function() {
+                    $(this).text(data['ratings']);
+                    let bID = $(this).attr("id");
+                    let btnType = $('input[name='+bID+']').val();
+                    if(isRated === true){
+                        $(this).siblings("."+btnType+"-btn").addClass(btnType+"-active");
+                    }else{
+                        $(this).siblings("."+btnType+"-btn").removeClass(btnType+"-active");
+                    }
+                });
             }
         });
-
-        return isRated;
     }
 </script>
