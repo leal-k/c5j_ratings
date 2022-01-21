@@ -194,8 +194,11 @@ class Controller extends \Concrete\Block\PageList\Controller
         }
 
         if ($this->filterByUserRated) {
-            $u = Core::make(User::class);
-            $uID = $u->getUserID();
+            $uID = 0;
+            $user = $this->app->make(User::class);
+            if ($user->isRegistered()) {
+                $uID = $user->getUserID();
+            }
             $this->list->filterByUserRated($uID);
         }
 
