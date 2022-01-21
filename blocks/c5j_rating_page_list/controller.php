@@ -49,8 +49,7 @@ class Controller extends \Concrete\Block\PageList\Controller
 
     public function registerViewAssets($outputContent = '')
     {
-        $this->requireAsset('javascript', 'client');
-        $this->requireAsset('css', 'ratings_button');
+        $this->requireAsset('c5j_ratings');
     }
 
     public function on_start()

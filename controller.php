@@ -69,20 +69,33 @@ class Controller extends Package
         $this->installXml();
     }
 
-    public function on_start()
+    public function on_start(): void
     {
-        $al = AssetList::getInstance();
-        $al->register(
-            'javascript', 'client', 'js/client.min.js', ['position' => Asset::ASSET_POSITION_HEADER], 'c5j_ratings'
-        );
-        $al->register(
-            'css', 'ratings_button', 'css/ratings_button.css', ['position' => Asset::ASSET_POSITION_HEADER], 'c5j_ratings'
-        );
+        $this->registerAssets();
     }
 
     private function installXml(): void
     {
         $ci = new ContentImporter();
         $ci->importContentFile($this->getPackagePath() . '/config/install.xml');
+    }
+
+    private function registerAssets(): void
+    {
+        $al = AssetList::getInstance();
+        $al->register(
+            'css', 'c5j_ratings', 'css/c5j_ratings.css', ['position' => Asset::ASSET_POSITION_HEADER], 'c5j_ratings'
+        );
+        $al->register(
+            'javascript', 'client', 'js/client.min.js', ['position' => Asset::ASSET_POSITION_FOOTER], 'c5j_ratings'
+        );
+        $al->register(
+            'javascript', 'c5j_ratings', 'js/c5j_ratings.js', ['position' => Asset::ASSET_POSITION_FOOTER], 'c5j_ratings'
+        );
+        $al->registerGroup('c5j_ratings', [
+            ['css', 'c5j_ratings'],
+            ['javascript', 'client'],
+            ['javascript', 'c5j_ratings'],
+        ]);
     }
 }
