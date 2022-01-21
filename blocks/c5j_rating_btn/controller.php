@@ -46,6 +46,7 @@ class Controller extends BlockController
 
     public function view()
     {
+        $this->set('ratings', $this->getRatingsCount());
     }
 
     private function getRatingsCount(): int
