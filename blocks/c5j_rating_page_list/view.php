@@ -188,6 +188,7 @@ if (is_object($c) && $c->isEditMode() && $controller->isBlockEmpty()) {
                     uID: uID,
                 },
                 success: function (data) {
+                    $(".ratings-"+cID).text(data['ratings']);
                     isRated = data['isRatedPage'];
                     if(data['isRatedPage']){
                         let btnType = $(".ratings-"+cID).attr("id");

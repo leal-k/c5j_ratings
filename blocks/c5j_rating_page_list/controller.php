@@ -220,7 +220,10 @@ class Controller extends \Concrete\Block\PageList\Controller
     {
         $this->token = $this->app->make('helper/validation/token');
         if ($this->token->validate('is_rated_page', $this->post('token'))) {
-            return JsonResponse::create(['isRatedPage' => $this->isRatedBy($this->post('cID'),$this->post('uID'))]);
+            return JsonResponse::create([
+                'isRatedPage' => $this->isRatedBy($this->post('cID'),$this->post('uID')),
+                'ratings' => $this->getRatingsCount($this->post('uID'), $this->post('cID'))
+            ]);
         }
     }
 
