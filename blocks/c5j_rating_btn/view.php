@@ -9,7 +9,7 @@ $btnType = $btnType ?? 'clap';
 <div>
     <span class="<?= $btnType ?>-btn"></span>
     <?php if ($displayRatings): ?>
-        <span class="ratings" id="<?= $bID ?>"></span>
+        <span class="ratings <?= $btnType ?>" id="<?= $bID ?>"><?= $ratings ?? 0 ?></span>
     <?php endif; ?>
     <input type="hidden" name="<?= $bID ?>" value="<?= $btnType ?>">
 </div>
@@ -18,7 +18,7 @@ $btnType = $btnType ?? 'clap';
 <script>
     $(document).ready(function () {
         let uID = getUserID();
-        isRatedBy(uID);
+        isRatedByPage(uID);
         let $el = $('.<?= $btnType ?>-btn');
         let activeClass = '<?= $btnType ?>-active';
 
@@ -50,8 +50,7 @@ $btnType = $btnType ?? 'clap';
             success: function(data) {
                 $('.ratings').each(function() {
                     $(this).text(data['ratings']);
-                    let bID = $(this).attr("id");
-                    let btnType = $('input[name='+bID+']').val();
+                    let btnType = $(this).attr("class").split(' ')[1];
                     if(parseInt(value) === 1){
                         $(this).siblings("."+btnType+"-btn").addClass(btnType+"-active");
                     }else{
@@ -62,7 +61,7 @@ $btnType = $btnType ?? 'clap';
         });
     }
 
-    function isRatedBy(uID) {
+    function isRatedByPage(uID) {
         let isRated = false;
         $.ajax({
             url: "<?= URL::to($view->action('is_rated')) ?>",
@@ -76,8 +75,7 @@ $btnType = $btnType ?? 'clap';
                 isRated = data['isRated'];
                 $('.ratings').each(function() {
                     $(this).text(data['ratings']);
-                    let bID = $(this).attr("id");
-                    let btnType = $('input[name='+bID+']').val();
+                    let btnType = $(this).attr("class").split(' ')[1];
                     if(isRated === true){
                         $(this).siblings("."+btnType+"-btn").addClass(btnType+"-active");
                     }else{
