@@ -19,6 +19,8 @@ class Controller extends BlockController
     /** @var \Concrete\Core\Validation\CSRF\Token */
     protected $token;
 
+    protected $btCacheBlockOutput = true;
+
     use RatingTrait;
 
     public function getBlockTypeName(): string
