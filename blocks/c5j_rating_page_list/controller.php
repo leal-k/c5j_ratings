@@ -14,7 +14,6 @@ use Concrete\Core\Page\Page;
 use Concrete\Core\Tree\Node\Node;
 use Concrete\Core\User\User;
 use Core;
-use Symfony\Component\HttpFoundation\JsonResponse;
 
 class Controller extends \Concrete\Block\PageList\Controller
 {
@@ -211,11 +210,11 @@ class Controller extends \Concrete\Block\PageList\Controller
 
     public function getPassThruActionAndParameters($parameters): array
     {
-        if ($parameters[0] == 'rate_page') {
-            $method = 'action_rate_page';
+        if ($parameters[0] == 'rate') {
+            $method = 'action_rate';
             $parameters = array_slice($parameters, 1);
-        }else if ($parameters[0] == 'is_rated_page') {
-            $method = 'action_is_rated_page';
+        }else if ($parameters[0] == 'get_ratings') {
+            $method = 'action_get_ratings';
             $parameters = array_slice($parameters, 1);
         }elseif ($parameters[0] == 'tag') {
             $method = 'action_filter_by_tag';

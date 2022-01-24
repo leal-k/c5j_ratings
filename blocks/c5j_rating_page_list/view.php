@@ -194,11 +194,10 @@ if (is_object($c) && $c->isEditMode() && $controller->isBlockEmpty()) {
 } ?>
 <script>
     $(document).ready(function () {
-        let uID = getUserID();
         let getUrl = "<?= URL::to($view->action('get_ratings')) ?>";
         let params = {
             token: "<?= Core::make('token')->generate('rating') ?>",
-            uID: uID,
+            uID: getUserID(),
         };
 
         $('input[name^="pageIDs"]').each(function() {

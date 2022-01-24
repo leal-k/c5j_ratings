@@ -1,6 +1,7 @@
 <?php
 /**
  * @author: Biplob Hossain <biplob.ice@gmail.com>
+ *
  * @license MIT
  */
 
@@ -11,15 +12,12 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 
 trait RatingTrait
 {
-    protected $cID;
-    protected $uID;
-
     public function action_rate(int $bID)
     {
         $this->token = $this->app->make('helper/validation/token');
         if ($this->token->validate('rating', $this->post('token'))) {
-            $uID = $this->getUserID();
-            $cID = $this->getCollectionID();
+            $cID = (int) $this->post('cID');
+            $uID = (int) $this->post('uID');
             $ratedValue = $this->post('ratedValue');
             $this->addRating($uID, $cID, $bID, $ratedValue);
 
@@ -27,33 +25,15 @@ trait RatingTrait
         }
     }
 
-    protected function getUserID(): int
+    public function action_get_ratings(int $bID)
     {
-        if (!$this->uID && $this->getRequest()->request->has('uID')) {
-            $this->uID = $this->getRequest()->request->get('uID');
+        $this->token = $this->app->make('helper/validation/token');
+        if ($this->token->validate('rating', $this->post('token'))) {
+            $cID = (int) $this->post('cID');
+            $uID = (int) $this->post('uID');
+
+            return JsonResponse::create($this->getRatings($cID, $uID));
         }
-
-        if (!$this->uID) {
-            $user = $this->app->make('user');
-            if ($user->isRegistered()) {
-                $this->uID = $user->getUserID();
-            }
-        }
-
-        return (int) $this->uID;
-    }
-
-    protected function getCollectionID(): int
-    {
-        if (!$this->cID && $this->getRequest()->request->has('cID')) {
-            $this->cID = $this->getRequest()->request->get('cID');
-        }
-
-        if (!$this->cID) {
-            $this->cID = $this->getRequest()->getCurrentPage()->getCollectionID();
-        }
-
-        return (int) $this->cID;
     }
 
     protected function addRating(int $uID, int $cID, int $bID, int $ratedValue): C5jRating
@@ -71,11 +51,8 @@ trait RatingTrait
         return $rating;
     }
 
-    protected function getRatings($cID = 0, $uID = 0): array
+    protected function getRatings(int $cID, int $uID): array
     {
-        $cID = $cID ?? $this->getCollectionID();
-        $uID = $uID ?? $this->getUserID();
-
         return [
             'cID' => $cID,
             'isRated' => $this->isRatedBy($cID, $uID),
@@ -89,7 +66,7 @@ trait RatingTrait
         $sql = 'SELECT ratedValue FROM C5jRatings WHERE cID = ? and uID = ? and ratedValue != 0';
         $params = [$cID, $uID];
 
-        return (int)$db->fetchColumn($sql, $params);
+        return (int) $db->fetchColumn($sql, $params);
     }
 
     protected function getRatingsCount(int $cID): int
@@ -99,16 +76,5 @@ trait RatingTrait
         $params = [$cID];
 
         return (int) $db->fetchColumn($sql, $params);
-    }
-
-    public function action_get_ratings(int $bID)
-    {
-        $this->token = $this->app->make('helper/validation/token');
-        if ($this->token->validate('rating', $this->post('token'))) {
-            $cID = $this->getCollectionID();
-            $uID = $this->getUserID();
-
-            return JsonResponse::create($this->getRatings($cID, $uID));
-        }
     }
 }
