@@ -1,14 +1,12 @@
 <?php
 defined('C5_EXECUTE') or die('Access Denied.');
 
-// TODO::Display the rating button on view
+$c = Page::getCurrentPage();
 
-$c = $this->controller->getRequest()->getCurrentPage();
-$app = \Concrete\Core\Support\Facade\Application::getFacadeApplication();
 /** @var \Concrete\Core\Utility\Service\Text $th */
-$th = $app->make('helper/text');
+$th = Core::make('helper/text');
 /** @var \Concrete\Core\Localization\Service\Date $dh */
-$dh = $app->make('helper/date');
+$dh = Core::make('helper/date');
 
 if (is_object($c) && $c->isEditMode() && $controller->isBlockEmpty()) {
     ?>
@@ -27,6 +25,14 @@ if (is_object($c) && $c->isEditMode() && $controller->isBlockEmpty()) {
             <?php
         } ?>
 
+        <?php if (isset($rssUrl) && $rssUrl) {
+            ?>
+            <a href="<?php echo $rssUrl ?>" target="_blank" class="ccm-block-page-list-rss-feed">
+                <i class="fa fa-rss"></i>
+            </a>
+            <?php
+        } ?>
+
         <div class="ccm-block-page-list-pages">
 
             <?php
@@ -42,45 +48,63 @@ if (is_object($c) && $c->isEditMode() && $controller->isBlockEmpty()) {
                 $includeEntryText = true;
             }
 
-            if(isset($pages)){
-
             foreach ($pages as $page) {
 
-                $c = \Concrete\Core\Page\Page::getByID($page['cID'], 'ACTIVE');
-                if (is_object($c)) {
-                    $buttonClasses = 'ccm-block-page-list-read-more';
-                    $entryClasses = 'ccm-block-page-list-page-entry';
-                    $title = $c->getCollectionName();
-                    if ($c->getCollectionPointerExternalLink() != '') {
-                        $url = $c->getCollectionPointerExternalLink();
-                        if ($c->openCollectionPointerExternalLinkInNewWindow()) {
-                            $target = '_blank';
-                        }
-                    } else {
-                        $url = $c->getCollectionLink();
-                        $target = $c->getAttribute('nav_target');
+                // Prepare data for each page being listed...
+                $buttonClasses = 'ccm-block-page-list-read-more';
+                $entryClasses = 'ccm-block-page-list-page-entry';
+                $title = $page->getCollectionName();
+                if ($page->getCollectionPointerExternalLink() != '') {
+                    $url = $page->getCollectionPointerExternalLink();
+                    if ($page->openCollectionPointerExternalLinkInNewWindow()) {
+                        $target = '_blank';
                     }
-                    $target = empty($target) ? '_self' : $target;
-                    $description = $c->getCollectionDescription();
-                    $description = $controller->truncateSummaries ? $th->wordSafeShortText($description, $controller->truncateChars) : $description;
-                    $thumbnail = false;
-                    if ($displayThumbnail) {
-                        $thumbnail = $c->getAttribute('thumbnail');
-                    }
-                    if (is_object($thumbnail) && $includeEntryText) {
-                        $entryClasses = 'ccm-block-page-list-page-entry-horizontal';
-                    }
-
-                    $date = $dh->formatDateTime($c->getCollectionDatePublic(), true);
+                } else {
+                    $url = $page->getCollectionLink();
+                    $target = $page->getAttribute('nav_target');
                 }
-                ?>
+                $target = empty($target) ? '_self' : $target;
+                $description = $page->getCollectionDescription();
+                $description = $controller->truncateSummaries ? $th->wordSafeShortText($description, $controller->truncateChars) : $description;
+                $thumbnail = false;
+                if ($displayThumbnail) {
+                    $thumbnail = $page->getAttribute('thumbnail');
+                }
+                if (is_object($thumbnail) && $includeEntryText) {
+                    $entryClasses = 'ccm-block-page-list-page-entry-horizontal';
+                }
+
+                $date = $dh->formatDateTime($page->getCollectionDatePublic(), true);
+
+                //Other useful page data...
+
+                //$last_edited_by = $page->getVersionObject()->getVersionAuthorUserName();
+
+                /* DISPLAY PAGE OWNER NAME
+                 * $page_owner = UserInfo::getByID($page->getCollectionUserID());
+                 * if (is_object($page_owner)) {
+                 *     echo $page_owner->getUserDisplayName();
+                 * }
+                 */
+
+                /* CUSTOM ATTRIBUTE EXAMPLES:
+                 * $example_value = $page->getAttribute('example_attribute_handle', 'display');
+                 *
+                 * When you need the raw attribute value or object:
+                 * $example_value = $page->getAttribute('example_attribute_handle');
+                 */
+
+                /* End data preparation. */
+
+                /* The HTML from here through "endforeach" is repeated for every item in the list... */ ?>
+
                 <div class="<?php echo $entryClasses ?>">
 
                     <?php if (is_object($thumbnail)) {
                         ?>
                         <div class="ccm-block-page-list-page-entry-thumbnail">
                             <?php
-                            $img = $app->make('html/image', [$thumbnail]);
+                            $img = Core::make('html/image', [$thumbnail]);
                             $tag = $img->getTag();
                             $tag->addClass('img-responsive');
                             echo $tag; ?>
@@ -107,21 +131,7 @@ if (is_object($c) && $c->isEditMode() && $controller->isBlockEmpty()) {
                                         <?php
 
                                     } ?>
-                                    <?php
-                                    $displayRatings = $displayRatings ?? "";
-                                    $btnType = $btnType ?? "";
-                                    if($displayRatings){
-                                        if($btnType){
-                                        ?>
-                                        <div>
-                                            <span class="<?= $btnType ?>-btn" id="btn-<?= $page['cID'] ?>" onclick="isPageRatedBy(<?= $page['cID'] ?>)"></span>
-                                                <span class="ratings-<?= $page['cID'] ?>" id="<?=$btnType?>"><?= $page['ratings'] ?? 0 ?></span>
-                                        </div>
-                                        <input type="hidden" name="pageIDs[]" value="<?= $page['cID'] ?>">
-                                            <?php
-                                             }
-                                        }
-                                        ?>
+                                </div>
                                 <?php
                             } ?>
 
@@ -146,14 +156,26 @@ if (is_object($c) && $c->isEditMode() && $controller->isBlockEmpty()) {
                                 <?php
                             } ?>
 
+                            <?php if($btnType){
+                                $cID = $page->getCollectionID();
+                                $ratingBtnID = sprintf('rating-%d-%d', $bID, $cID);
+                                ?>
+                                <div>
+                                    <span id="<?= $ratingBtnID ?>" class="rating-<?= $cID ?> <?= $btnType ?>-btn" data-btn-type="<?= $btnType ?>" onclick="addRating($(this), <?= $cID ?>)"></span>
+                                    <?php if ($displayRatings): ?>
+                                        <span><?= $ratings['ratings'] ?? 0 ?></span>
+                                    <?php endif; ?>
+                                    <input type="hidden" name="pageIDs[]" value="<?= $cID ?>">
+                                </div>
+                                <?php
+                            } ?>
                         </div>
                         <?php
                     } ?>
                 </div>
 
                 <?php
-            }
-            }?>
+            } ?>
         </div><!-- end .ccm-block-page-list-pages -->
 
         <?php if (count($pages) == 0) { ?>
@@ -172,48 +194,21 @@ if (is_object($c) && $c->isEditMode() && $controller->isBlockEmpty()) {
 } ?>
 <script>
     $(document).ready(function () {
+        let uID = getUserID();
+        let getUrl = "<?= URL::to($view->action('get_ratings')) ?>";
+        let params = {
+            token: "<?= Core::make('token')->generate('rating') ?>",
+            uID: uID,
+        };
 
-        $('input[name^="pageIDs"]').each( function(key,value) {
-            let uID = getUserID();
-            isRatedBy(this.value,uID);
+        $('input[name^="pageIDs"]').each(function() {
+            params['cID'] = this.value;
+            getRatings(getUrl, params);
         });
-        function isRatedBy(cID,uID) {
-            let isRated = false;
-            $.ajax({
-                url: "<?= URL::to($view->action('is_rated_page')) ?>",
-                type: 'post',
-                data: {
-                    token: "<?= $app->make('token')->generate('is_rated_page') ?>",
-                    cID: cID,
-                    uID: uID,
-                },
-                success: function (data) {
-                    $(".ratings-"+cID).text(data['ratings']);
-                    isRated = data['isRatedPage'];
-                    if(data['isRatedPage']){
-                        let btnType = $(".ratings-"+cID).attr("id");
-                        $("#btn-"+cID).addClass(btnType+"-active");
-                    }
-
-                }
-            });
-
-        }
     });
 
-    function isPageRatedBy(cID) {
-        let uID = getUserID();
-        let btnType = $(".ratings-"+cID).attr("id");
-        let ratedValue = 1;
-        if($("#btn-"+cID).hasClass(btnType+"-active")) {
-            ratedValue = 0;
-        }
-
-        pageRateIt(uID, cID, ratedValue, btnType);
-    }
-
     function getUserID() {
-        let uID = "<?= $app->make('user')->getUserID() ?>";
+        let uID = "<?= Core::make('user')->getUserID() ?>";
         if (!uID) {
             const client = new ClientJS();
             uID = client.getFingerprint();
@@ -222,28 +217,16 @@ if (is_object($c) && $c->isEditMode() && $controller->isBlockEmpty()) {
         return uID;
     }
 
-    function pageRateIt(uID, cID, ratedValue, btnType) {
-        $.ajax({
-            url: "<?= $view->action('rate_page')?>",
-            type: 'post',
-            data: {
-                token: "<?= $app->make('token')->generate('rate_page') ?>",
-                uID: uID,
-                cID: cID,
-                ratedValue: ratedValue
-            },
-            success: function(data) {
-                $(".ratings-"+cID).text(data['ratings']);
-                if(ratedValue === 0){
-                    $("#btn-"+cID).removeClass(btnType+"-active");
-                }else{
-                    $("#btn-"+cID).addClass(btnType+"-active");
-                }
-            }
-        });
-
-
+    function addRating(elem, cID) {
+        let addUrl = "<?= URL::to($view->action('rate')) ?>";
+        let btnType = elem.data('btn-type');
+        let activeClass = btnType + '-active';
+        let params = {
+            token: "<?= Core::make('token')->generate('rating') ?>",
+            uID: getUserID(),
+            cID: cID,
+            ratedValue: elem.hasClass(activeClass) ? 0 : 1
+        }
+        updateRatings(addUrl, params);
     }
-
-
 </script>
