@@ -7,15 +7,13 @@
 
 namespace Concrete\Package\C5jRatings\Block\C5jRatingPageList;
 
-use C5jRatings\Entity\C5jRating;
 use C5jRatings\Page\PageList;
+use C5jRatings\Traits\RatingTrait;
 use Concrete\Core\Attribute\Key\CollectionKey;
 use Concrete\Core\Page\Page;
 use Concrete\Core\Tree\Node\Node;
 use Concrete\Core\User\User;
 use Core;
-use Database;
-use Symfony\Component\HttpFoundation\JsonResponse;
 
 class Controller extends \Concrete\Block\PageList\Controller
 {
@@ -29,6 +27,8 @@ class Controller extends \Concrete\Block\PageList\Controller
 
     /** @var \Concrete\Core\Validation\CSRF\Token */
     protected $token;
+
+    use RatingTrait;
 
     public function getBlockTypeName(): string
     {
@@ -49,8 +49,7 @@ class Controller extends \Concrete\Block\PageList\Controller
 
     public function registerViewAssets($outputContent = '')
     {
-        $this->requireAsset('javascript', 'client');
-        $this->requireAsset('css', 'ratings_button');
+        $this->requireAsset('c5j_ratings');
     }
 
     public function on_start()
@@ -194,8 +193,11 @@ class Controller extends \Concrete\Block\PageList\Controller
         }
 
         if ($this->filterByUserRated) {
-            $u = Core::make(User::class);
-            $uID = $u->getUserID();
+            $uID = 0;
+            $user = $this->app->make(User::class);
+            if ($user->isRegistered()) {
+                $uID = $user->getUserID();
+            }
             $this->list->filterByUserRated($uID);
         }
 
@@ -206,40 +208,13 @@ class Controller extends \Concrete\Block\PageList\Controller
         return $this->list;
     }
 
-    public function action_rate_page(int $bID)
+    public function getPassThruActionAndParameters($parameters): array
     {
-        $this->token = $this->app->make('helper/validation/token');
-        if ($this->token->validate('rate_page', $this->post('token'))) {
-            $this->addRating($this->post('uID'), $this->post('cID'),$bID, $this->post('ratedValue'));
-
-            return JsonResponse::create(['ratings' => $this->getRatingsCount($this->post('uID'), $this->post('cID'))]);
-        }
-    }
-
-    public function action_is_rated_page(int $bID)
-    {
-        $this->token = $this->app->make('helper/validation/token');
-        if ($this->token->validate('is_rated_page', $this->post('token'))) {
-            return JsonResponse::create(['isRatedPage' => $this->isRatedBy($this->post('cID'),$this->post('uID'))]);
-        }
-    }
-
-    public function isRatedBy(int $cID,int $uID): bool
-    {
-        $db = $this->app->make('database/connection');
-        $sql = 'SELECT ratedValue FROM C5jRatings WHERE cID = ? and uID = ? and ratedValue != 0';
-        $params = [$cID,$uID];
-
-        return (int) $db->fetchColumn($sql, $params);
-    }
-
-    public function getPassThruActionAndParameters($parameters)
-    {
-        if ($parameters[0] == 'rate_page') {
-            $method = 'action_rate_page';
+        if ($parameters[0] == 'rate') {
+            $method = 'action_rate';
             $parameters = array_slice($parameters, 1);
-        }else if ($parameters[0] == 'is_rated_page') {
-            $method = 'action_is_rated_page';
+        }else if ($parameters[0] == 'get_ratings') {
+            $method = 'action_get_ratings';
             $parameters = array_slice($parameters, 1);
         }elseif ($parameters[0] == 'tag') {
             $method = 'action_filter_by_tag';
@@ -258,7 +233,7 @@ class Controller extends \Concrete\Block\PageList\Controller
         return [$method, $parameters];
     }
 
-    public function isValidControllerTask($method, $parameters = [])
+    public function isValidControllerTask($method, $parameters = []): bool
     {
         if ($method === 'action_filter_by_date') {
             // Parameter 0 must be set
@@ -274,29 +249,5 @@ class Controller extends \Concrete\Block\PageList\Controller
         }
 
         return true;
-    }
-
-    private function addRating(int $uID, int $cID, int $bID, int $ratedValue): C5jRating
-    {
-        $rating = C5jRating::getByCIDAndUID($cID, $uID);
-        if (!$rating) {
-            $rating = new C5jRating();
-        }
-        $rating->setBID($bID);
-        $rating->setCID($cID);
-        $rating->setUID($uID);
-        $rating->setRatedValue($ratedValue);
-        $rating->save();
-
-        return $rating;
-    }
-
-    private function getRatingsCount(int $uID, int $cID): int
-    {
-        $db = $this->app->make('database/connection');
-        $sql = 'SELECT SUM(ratedValue) AS ratings FROM C5jRatings WHERE cID=? and ratedValue != 0';
-
-        return (int) $db->fetchColumn($sql, [$cID]);
-
     }
 }

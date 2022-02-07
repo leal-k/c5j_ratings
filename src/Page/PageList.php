@@ -16,12 +16,11 @@ class PageList extends \Concrete\Core\Page\PageList
         $this->query->addSelect('SUM(r.ratedValue) AS ratings');
         $this->query->addSelect('r.bID');
         $this->query->addGroupBy('p.cID');
-
     }
 
     public function filterByUserRated(int $uID): void
     {
-        $this->query->andWhere($this->query->expr()->in('p.cID', 'Select cID from c5jRatings where uID = :uID'));
+        $this->query->andWhere($this->query->expr()->in('p.cID', 'Select cID from C5jRatings where uID = :uID  and ratedValue != 0'));
         $this->query->setParameter('uID', $uID, Type::INTEGER);
     }
 
@@ -33,10 +32,5 @@ class PageList extends \Concrete\Core\Page\PageList
     public function sortByMostRated(): void
     {
         $this->query->orderBy('ratings', 'DESC');
-    }
-
-    public function getResult($queryRow)
-    {
-        return $queryRow;
     }
 }
