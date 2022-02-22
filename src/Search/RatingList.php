@@ -13,21 +13,12 @@ class RatingList extends EntityItemList implements PaginationProviderInterface
 {
     protected $entityManager;
     protected $itemsPerPage = 10;
-    protected $autoSortColumns = ['r.ratedAt'];
+    protected $autoSortColumns = ['r.cIDr','r.uID','r.ratedAt'];
 
     public function __construct(EntityManagerInterface $entityManager)
     {
         $this->entityManager = $entityManager;
         parent::__construct();
-        $this->sortByID();
-    }
-
-    /**
-     * @param string $direction
-     */
-    public function sortByID($direction = 'desc')
-    {
-        $this->sortBy('r.ratedAt', $direction);
     }
 
     /**
@@ -38,7 +29,6 @@ class RatingList extends EntityItemList implements PaginationProviderInterface
      */
     public function filterByRatedDate($date, $comparison = '>=')
     {
-       // $this->query->andWhere($this->query->expr()->comparison('r.ratedAt',$comparison, ':date'));
         $this->query->andWhere($this->query->expr()->GTE('r.ratedAt', ':date'));
         $this->query->setParameter('date', $date);
     }
