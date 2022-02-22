@@ -10,7 +10,7 @@ use Concrete\Core\Http\Request;
 use Concrete\Core\Page\Controller\DashboardPageController;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
-class RatingsHistory extends DashboardPageController
+class Ratings extends DashboardPageController
 {
     protected $ratingsList;
 
@@ -32,6 +32,9 @@ class RatingsHistory extends DashboardPageController
                 break;
             case 'r.ratedAt':
                 $this->ratingsList->sortBy('r.ratedAt', $r->query->get('ccm_order_by_direction'));
+                break;
+            default:
+                $this->ratingsList->sortBy('r.ratedAt', 'desc');
                 break;
         }
 
@@ -76,11 +79,10 @@ class RatingsHistory extends DashboardPageController
             $config = $this->app->make('config');
             $bom = $config->get('concrete.export.csv.include_bom') ? $config->get('concrete.charset_bom') : '';
 
-            $ratingsList = $this->getFilterByRatedDate();
-            $ratings = $ratingsList->get(0);
+            $ratingList = $this->getFilterByRatedDate();
 
             return StreamedResponse::create(
-                function () use ($app, $bom, $ratings) {
+                function () use ($app, $bom, $ratingList) {
                     $writer = $app->build(
                         ExportRatings::class,
                         [
@@ -89,7 +91,7 @@ class RatingsHistory extends DashboardPageController
                     );
                     echo $bom;
                     $writer->insertHeaders();
-                    $writer->insertRows($ratings);
+                    $writer->insertRatingList($ratingList);
                 }, 200, $headers
             );
         }

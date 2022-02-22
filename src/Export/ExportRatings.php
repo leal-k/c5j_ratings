@@ -8,6 +8,7 @@ use Concrete\Core\User\UserInfoRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Iterator;
 use League\Csv\Writer;
+use C5jRatings\Search\RatingList;
 
 class ExportRatings
 {
@@ -36,9 +37,13 @@ class ExportRatings
         $this->writer->insertOne(iterator_to_array($this->getHeaders()));
     }
 
-    public function insertRows(array $ratings): void
+    /**
+     * Insert all data from the passed RatingList
+     * @param \C5jRatings\Search\RatingList $ratingList
+     */
+    public function insertRatingList(RatingList $ratingList): void
     {
-        $this->writer->insertAll($this->getRows($ratings));
+        $this->writer->insertAll($this->projectList($ratingList));
     }
 
     private function getHeaders(): Iterator
@@ -48,14 +53,25 @@ class ExportRatings
         yield 'ratedAt';
     }
 
-    private function getRows(array $ratings): Iterator
+    /**
+     * A generator that takes an ratingList and converts it to CSV rows
+     * @param \C5jRatings\Search\RatingList $ratingList
+     * @return \Generator
+     */
+    private function projectList(RatingList $ratingList): Iterator
     {
+        $ratings = $ratingList->executeGetResults();
         foreach ($ratings as $rating) {
-            yield iterator_to_array($this->getRow($rating));
+            yield iterator_to_array($this->projectEntry($rating));
         }
     }
 
-    private function getRow(C5jRating $rating): Iterator
+    /**
+     * Turn an Entry into an array
+     * @param \C5jRatings\Entity\C5jRating $entry
+     * @return array
+     */
+    private function projectEntry(C5jRating $rating): Iterator
     {
         $page = \Concrete\Core\Page\Page::getByID($rating->getCID());
         $ui = $this->app->make(UserInfoRepository::class)->getByID($rating->getUID());
