@@ -12,16 +12,10 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class Ratings extends DashboardPageController
 {
-    protected $ratingsList;
-
-    public function on_start()
-    {
-        parent::on_start();
-        $this->ratingsList = new RatingList($this->entityManager);
-    }
-
     public function view()
     {
+        $ratingsList = $this->getFilterByRatedDate();
+
         $r = Request::getInstance();
         $query = http_build_query([
             'rated_date' => $r->query->get('rated_date'),
@@ -30,10 +24,10 @@ class Ratings extends DashboardPageController
         ]);
         $this->set('query', $query);
 
-        $pagination = $this->ratingsList->getPagination();
+        $pagination = $ratingsList->getPagination();
         $results = $pagination->getCurrentPageResults();
 
-        $this->set('ratingsList', $this->ratingsList);
+        $this->set('ratingsList', $ratingsList);
         $this->set('ratings', $results);
         $this->set('pagination', $pagination);
     }
@@ -41,7 +35,6 @@ class Ratings extends DashboardPageController
     public function search_ratings()
     {
         if ($this->token->validate('search_ratings')) {
-            $this->getFilterByRatedDate();
             $this->view();
         }
     }
@@ -82,15 +75,17 @@ class Ratings extends DashboardPageController
         return $this->buildRedirect($this->action('view'));
     }
 
-    protected function getFilterByRatedDate()
+    protected function getFilterByRatedDate(): RatingList
     {
+        $ratingsList = new RatingList($this->entityManager);
+
         $r = Request::getInstance();
         if ($r->query->has('rated_date') && $r->query->get('rated_date') !== '') {
-            $this->ratingsList->filterByRatedDate($r->query->get('rated_date'));
+            $ratingsList->filterByRatedDate($r->query->get('rated_date'));
             $this->set('rated_date', $r->query->get('rated_date'));
 
         }
 
-        return $this->ratingsList;
+        return $ratingsList;
     }
 }
