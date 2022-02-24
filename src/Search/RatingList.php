@@ -76,8 +76,6 @@ class RatingList extends EntityItemList implements PaginationProviderInterface
      */
     public function getPaginationAdapter()
     {
-        $adapter = new DoctrineORMAdapter($this->deliverQueryObject());
-
-        return $adapter;
+        return new DoctrineORMAdapter($this->deliverQueryObject());
     }
 }
