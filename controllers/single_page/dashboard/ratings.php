@@ -33,11 +33,9 @@ class Ratings extends DashboardPageController
         $pagination = $this->ratingsList->getPagination();
         $results = $pagination->getCurrentPageResults();
 
-        if ($results) {
-            $this->set('ratingsList', $this->ratingsList);
-            $this->set('ratings', $results);
-            $this->set('pagination', $pagination);
-        }
+        $this->set('ratingsList', $this->ratingsList);
+        $this->set('ratings', $results);
+        $this->set('pagination', $pagination);
     }
 
     public function search_ratings()
