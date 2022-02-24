@@ -49,7 +49,7 @@ class RatingList extends EntityItemList implements PaginationProviderInterface
     /**
      * @param $result
      *
-     * @return Event
+     * @return C5jRating
      */
     public function getResult($result)
     {
