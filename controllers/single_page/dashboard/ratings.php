@@ -23,21 +23,6 @@ class Ratings extends DashboardPageController
     public function view()
     {
         $r = Request::getInstance();
-        switch ($r->query->get('ccm_order_by')) {   //order by columns
-            case 'r.cID':
-                $this->ratingsList->sortBy('r.cID', $r->query->get('ccm_order_by_direction'));
-                break;
-            case 'r.uID':
-                $this->ratingsList->sortBy('r.uID', $r->query->get('ccm_order_by_direction'));
-                break;
-            case 'r.ratedAt':
-                $this->ratingsList->sortBy('r.ratedAt', $r->query->get('ccm_order_by_direction'));
-                break;
-            default:
-                $this->ratingsList->sortBy('r.ratedAt', 'desc');
-                break;
-        }
-
         $query = http_build_query([
             'rated_date' => $r->query->get('rated_date'),
             'ccm_order_by' => $r->query->get('ccm_order_by'),
