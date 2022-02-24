@@ -2,7 +2,7 @@
 
 namespace Concrete\Package\C5jRatings\Controller\SinglePage\Dashboard;
 
-use C5jRatings\Export\ExportRatings;
+use C5jRatings\Export\RatingExporter;
 use C5jRatings\Search\RatingList;
 use Carbon\Carbon;
 use Concrete\Core\Csv\WriterFactory;
@@ -67,7 +67,7 @@ class Ratings extends DashboardPageController
             return StreamedResponse::create(
                 function () use ($app, $bom, $ratingList) {
                     $writer = $app->build(
-                        ExportRatings::class,
+                        RatingExporter::class,
                         [
                             'writer' => $this->app->make(WriterFactory::class)->createFromPath('php://output', 'w'),
                         ]

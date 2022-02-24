@@ -3,14 +3,14 @@
 namespace C5jRatings\Export;
 
 use C5jRatings\Entity\C5jRating;
+use C5jRatings\Search\RatingList;
 use Concrete\Core\Support\Facade\Application;
 use Concrete\Core\User\UserInfoRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Iterator;
 use League\Csv\Writer;
-use C5jRatings\Search\RatingList;
 
-class ExportRatings
+class RatingExporter
 {
     /**
      * @var \League\Csv\Writer
@@ -38,7 +38,8 @@ class ExportRatings
     }
 
     /**
-     * Insert all data from the passed RatingList
+     * Insert all data from the passed RatingList.
+     *
      * @param \C5jRatings\Search\RatingList $ratingList
      */
     public function insertRatingList(RatingList $ratingList): void
@@ -54,8 +55,10 @@ class ExportRatings
     }
 
     /**
-     * A generator that takes an ratingList and converts it to CSV rows
+     * A generator that takes an ratingList and converts it to CSV rows.
+     *
      * @param \C5jRatings\Search\RatingList $ratingList
+     *
      * @return \Generator
      */
     private function projectList(RatingList $ratingList): Iterator
@@ -67,8 +70,11 @@ class ExportRatings
     }
 
     /**
-     * Turn an Entry into an array
+     * Turn an Entry into an array.
+     *
      * @param \C5jRatings\Entity\C5jRating $entry
+     * @param C5jRating $rating
+     *
      * @return array
      */
     private function projectEntry(C5jRating $rating): Iterator
