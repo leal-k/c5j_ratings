@@ -55,7 +55,7 @@ class Ratings extends DashboardPageController
         if (!$this->error->has()) {
             $headers = [
                 'Content-Type' => 'text/csv',
-                'Content-Disposition' => 'attachment; filename=ratings_history_' . Carbon::now() . '.csv',
+                'Content-Disposition' => 'attachment; filename=ratings_' . Carbon::now() . '.csv',
             ];
 
             $app = $this->app;
