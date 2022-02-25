@@ -14,7 +14,7 @@ class Ratings extends DashboardPageController
 {
     public function view()
     {
-        $ratingsList = $this->getFilterByRatedDate();
+        $ratingsList = $this->getFilteredList();
 
         $r = Request::getInstance();
         $query = http_build_query([
@@ -55,7 +55,7 @@ class Ratings extends DashboardPageController
             $config = $this->app->make('config');
             $bom = $config->get('concrete.export.csv.include_bom') ? $config->get('concrete.charset_bom') : '';
 
-            $ratingList = $this->getFilterByRatedDate();
+            $ratingList = $this->getFilteredList();
 
             return StreamedResponse::create(
                 function () use ($app, $bom, $ratingList) {
@@ -75,7 +75,7 @@ class Ratings extends DashboardPageController
         return $this->buildRedirect($this->action('view'));
     }
 
-    protected function getFilterByRatedDate(): RatingList
+    protected function getFilteredList(): RatingList
     {
         $ratingsList = new RatingList($this->entityManager);
 
