@@ -48,7 +48,7 @@ $token = $app->make('helper/validation/token');
                 <tr>
                     <th class="<?=$ratingsList->getSortClassName('r.cID')?>"><a href="<?=$ratingsList->getSortURL('r.cID')?>"><?= t('Page Name')?></a></th>
                     <th class="<?=$ratingsList->getSortClassName('r.uID')?>"><a href="<?=$ratingsList->getSortURL('r.uID')?>"><?= t('User')?></a></th>
-                    <th class="<?=$ratingsList->getSortClassName('r.ratedAt')?>"><a href="<?=$ratingsList->getSortURL('r.ratedAt')?>"><?= t('ratedAt')?></a></th>
+                    <th class="<?=$ratingsList->getSortClassName('r.ratedAt')?>"><a href="<?=$ratingsList->getSortURL('r.ratedAt')?>"><?= t('Rated At')?></a></th>
                 </tr>
                 </thead>
                 <tbody>
