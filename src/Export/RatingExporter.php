@@ -82,9 +82,9 @@ class RatingExporter
         $page = \Concrete\Core\Page\Page::getByID($rating->getCID());
         $ui = $this->app->make(UserInfoRepository::class)->getByID($rating->getUID());
         if($ui){
-            $name = $ui->getUserName();
+            $name = h($ui->getUserName());
         }else{
-            $name = 'unknown';
+            $name = t('Unknown');
         }
 
         yield $page->getCollectionName();
