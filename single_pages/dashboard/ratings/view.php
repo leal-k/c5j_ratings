@@ -7,6 +7,8 @@ $app = \Concrete\Core\Support\Facade\Application::getFacadeApplication();
 $form = $app->make('helper/form');
 /* @var Concrete\Core\Validation\CSRF\Token $token */
 $token = $app->make('helper/validation/token');
+/* @var $dh \Concrete\Core\Localization\Service\Date */
+$dh = $app->make('helper/date');
 ?>
 <style>
     .ratings-header-menu{
@@ -65,7 +67,7 @@ $token = $app->make('helper/validation/token');
                     <tr>
                         <td><?=h($page->getCollectionName())?></td>
                         <td><?=$name?></td>
-                        <td><?=h($rating->getRatedAt()->format('Y/m/d'))?></td>
+                        <td><?=$dh->formatDateTime($rating->getRatedAt(), true, true);?></td>
                     </tr>
                     <?php
                 }
