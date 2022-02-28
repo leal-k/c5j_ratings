@@ -81,15 +81,14 @@ class RatingExporter
     {
         $page = \Concrete\Core\Page\Page::getByID($rating->getCID());
         $ui = $this->app->make(UserInfoRepository::class)->getByID($rating->getUID());
-        if($ui){
+        if ($ui) {
             $name = h($ui->getUserName());
-        }else{
+        } else {
             $name = t('Unknown');
         }
 
         yield $page->getCollectionName();
         yield $name;
         yield $rating->getRatedAt()->format('Y/m/d H:i:s');
-
     }
 }

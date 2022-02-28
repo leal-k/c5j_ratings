@@ -1,6 +1,7 @@
 <?php
 /**
  * @author: Biplob Hossain <biplob.ice@gmail.com>
+ *
  * @license MIT
  */
 
@@ -73,6 +74,7 @@ class C5jRating
     public static function getByBIDAndUID(int $bID, int $uID): ?object
     {
         $em = \ORM::entityManager();
+
         return $em->getRepository(__CLASS__)
             ->findOneBy(['bID' => $bID, 'uID' => $uID]);
     }
@@ -80,6 +82,7 @@ class C5jRating
     public static function getByCIDAndUID(int $cID, int $uID): ?object
     {
         $em = \ORM::entityManager();
+
         return $em->getRepository(__CLASS__)
             ->findOneBy(['cID' => $cID, 'uID' => $uID]);
     }

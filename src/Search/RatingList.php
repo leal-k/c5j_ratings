@@ -13,7 +13,7 @@ class RatingList extends EntityItemList implements PaginationProviderInterface
 {
     protected $entityManager;
     protected $itemsPerPage = 10;
-    protected $autoSortColumns = ['r.cID','r.uID','r.ratedAt'];
+    protected $autoSortColumns = ['r.cID', 'r.uID', 'r.ratedAt'];
 
     public function __construct(EntityManagerInterface $entityManager)
     {

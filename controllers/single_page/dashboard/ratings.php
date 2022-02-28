@@ -68,7 +68,9 @@ class Ratings extends DashboardPageController
                     echo $bom;
                     $writer->insertHeaders();
                     $writer->insertRatingList($ratingList);
-                }, 200, $headers
+                },
+                200,
+                $headers
             );
         }
 
@@ -83,7 +85,6 @@ class Ratings extends DashboardPageController
         if ($r->query->has('rated_date') && $r->query->get('rated_date') !== '') {
             $ratingsList->filterByRatedDate($r->query->get('rated_date'));
             $this->set('rated_date', $r->query->get('rated_date'));
-
         }
 
         return $ratingsList;

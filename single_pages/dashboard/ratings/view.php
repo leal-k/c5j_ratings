@@ -40,7 +40,7 @@ $dh = $app->make('helper/date');
 </div>
 <div class="ccm-dashboard-content-full">
     <?php
-    if(isset($ratingsList, $ratings) && count($ratings) > 0){
+    if (isset($ratingsList, $ratings) && count($ratings) > 0) {
         ?>
 
         <div class="table-responsive">
@@ -57,20 +57,18 @@ $dh = $app->make('helper/date');
                 foreach ($ratings as $rating) {
                     $page = \Concrete\Core\Page\Page::getByID($rating->getCID());
                     $ui = $app->make(UserInfoRepository::class)->getByID($rating->getUID());
-                    if($ui){
+                    if ($ui) {
                         $name = h($ui->getUserName());
-                    }else{
+                    } else {
                         $name = t('Unknown');
-                    }
-                    ?>
+                    } ?>
                     <tr>
                         <td><?=h($page->getCollectionName())?></td>
                         <td><?=$name?></td>
-                        <td><?=$dh->formatDateTime($rating->getRatedAt(), true, true);?></td>
+                        <td><?=$dh->formatDateTime($rating->getRatedAt(), true, true); ?></td>
                     </tr>
                     <?php
-                }
-                ?>
+                } ?>
                 </tbody>
             </table>
         </div>
@@ -78,12 +76,11 @@ $dh = $app->make('helper/date');
             <?php
             if (isset($pagination) && is_object($pagination)) {
                 echo $pagination->renderDefaultView();
-            }
-            ?>
+            } ?>
         </div>
         <?php
-    }else{
-        echo "<p class='text-center'>".t('No search results were found')."</p>";
+    } else {
+        echo "<p class='text-center'>" . t('No search results were found') . '</p>';
     }
     ?>
 </div>

@@ -84,13 +84,25 @@ class Controller extends Package
     {
         $al = AssetList::getInstance();
         $al->register(
-            'css', 'c5j_ratings', 'css/c5j_ratings.css', ['position' => Asset::ASSET_POSITION_HEADER], 'c5j_ratings'
+            'css',
+            'c5j_ratings',
+            'css/c5j_ratings.css',
+            ['position' => Asset::ASSET_POSITION_HEADER],
+            'c5j_ratings'
         );
         $al->register(
-            'javascript', 'client', 'js/client.min.js', ['position' => Asset::ASSET_POSITION_FOOTER], 'c5j_ratings'
+            'javascript',
+            'client',
+            'js/client.min.js',
+            ['position' => Asset::ASSET_POSITION_FOOTER],
+            'c5j_ratings'
         );
         $al->register(
-            'javascript', 'c5j_ratings', 'js/c5j_ratings.js', ['position' => Asset::ASSET_POSITION_FOOTER], 'c5j_ratings'
+            'javascript',
+            'c5j_ratings',
+            'js/c5j_ratings.js',
+            ['position' => Asset::ASSET_POSITION_FOOTER],
+            'c5j_ratings'
         );
         $al->registerGroup('c5j_ratings', [
             ['css', 'c5j_ratings'],
