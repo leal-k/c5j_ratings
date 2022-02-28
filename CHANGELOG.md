@@ -1,7 +1,7 @@
 # Changelog
 
-## [0.1.2] - 2022-02-18
-### Fixed
+## [0.1.2] - 2022-02-28
+### Added
 - Add Dashboard Report
 
 ## [0.1.1] - 2022-02-07
