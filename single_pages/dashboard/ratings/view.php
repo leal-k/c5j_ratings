@@ -24,7 +24,6 @@ $dh = $app->make('helper/date');
     <form class="form-inline" action="<?php echo $view->action('search_ratings'); ?>">
         <?php echo $token->output('search_ratings'); ?>
         <div class="ccm-header-search-form-input">
-            <?=$form->label('rated_date', t('Rated Date')); ?>
             <?= $app->make('helper/form/date_time')->date('rated_date', $rated_date) ?>
         </div>
 
@@ -88,3 +87,6 @@ $dh = $app->make('helper/date');
     }
     ?>
 </div>
+<script>
+    $('#rated_date_pub').attr('Placeholder', "<?= t('Rated From') ?>");
+</script>
