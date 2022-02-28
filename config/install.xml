@@ -10,4 +10,12 @@
             <blocktype handle="c5j_rating_page_list"/>
         </blocktypeset>
     </blocktypesets>
+    <singlepages>
+        <page name="Ratings"
+              path="/dashboard/ratings"
+              filename="/dashboard/ratings/view.php"
+              pagetype=""
+              description=""
+              package="c5j_ratings"/>
+    </singlepages>
 </concrete5-cif>

@@ -6,6 +6,7 @@
  *
  * @license MIT
  */
+
 namespace Concrete\Package\C5jRatings\Block\C5jRatingBtn;
 
 use C5jRatings\Traits\RatingTrait;
@@ -13,6 +14,7 @@ use Concrete\Core\Block\BlockController;
 
 class Controller extends BlockController
 {
+    use RatingTrait;
     protected $btTable = 'btC5jRatings';
     /** @var \Concrete\Core\Database\Connection\Connection */
     protected $db;
@@ -20,8 +22,6 @@ class Controller extends BlockController
     protected $token;
 
     protected $btCacheBlockOutput = true;
-
-    use RatingTrait;
 
     public function getBlockTypeName(): string
     {

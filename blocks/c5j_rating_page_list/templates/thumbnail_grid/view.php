@@ -53,13 +53,12 @@ $c = Page::getCurrentPage();
                 </a>
 
                 <?php if ($useButtonForLink) {
-    ?>
+                    ?>
                 <div class="ccm-block-page-list-title">
-                    <?php echo $title;
-    ?>
+                    <?php echo $title; ?>
                 </div>
                 <?php
-} ?>
+                } ?>
 
                 <?php if ($includeDate): ?>
                     <div class="ccm-block-page-list-date"><?=$date?></div>

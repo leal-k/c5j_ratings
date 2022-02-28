@@ -47,17 +47,13 @@ $form = $app->make('helper/form/page_selector');
                             <option
                                 value="<?= $ct->getPageTypeID() ?>" <?php if ($ptID == $ct->getPageTypeID()) {
                                 ?> selected <?php
-                            }
-                            ?>>
+                            } ?>>
                                 <?= $ct->getPageTypeDisplayName() ?>
                             </option>
                             <?php
-
-                        }
-                        ?>
+                        } ?>
                     </select>
                     <?php
-
                 }
                 ?>
             </div>
@@ -70,8 +66,8 @@ $form = $app->make('helper/form/page_selector');
                     <label>
                         <input type="radio" name="topicFilter" id="topicFilter"
                                value="" <?php if (!$filterByRelated && !$filterByCustomTopic) {
-                            ?> checked<?php
-                        } ?> />
+                    ?> checked<?php
+                } ?> />
                         <?= t('No topic filtering') ?>
                     </label>
                 </div>
@@ -79,8 +75,8 @@ $form = $app->make('helper/form/page_selector');
                     <label>
                         <input type="radio" name="topicFilter" id="topicFilterCustom"
                                value="custom" <?php if ($filterByCustomTopic) {
-                            ?> checked<?php
-                        } ?>>
+                    ?> checked<?php
+                } ?>>
                         <?= t('Custom Topic') ?>
                     </label>
                 </div>
@@ -88,8 +84,8 @@ $form = $app->make('helper/form/page_selector');
                     <label>
                         <input type="radio" name="topicFilter" id="topicFilterRelated"
                                value="related" <?php if ($filterByRelated) {
-                            ?> checked<?php
-                        } ?> >
+                    ?> checked<?php
+                } ?> >
                         <?= t('Related Topic') ?>
                     </label>
                 </div>
@@ -97,14 +93,12 @@ $form = $app->make('helper/form/page_selector');
                     <select class="form-control" name="customTopicAttributeKeyHandle" id="customTopicAttributeKeyHandle">
                         <option value=""><?=t('Choose topics attribute.')?></option>
                         <?php foreach ($attributeKeys as $attributeKey) {
-                            $attributeController = $attributeKey->getController();
-                            ?>
+                    $attributeController = $attributeKey->getController(); ?>
                             <option data-topic-tree-id="<?=$attributeController->getTopicTreeID()?>" value="<?=$attributeKey->getAttributeKeyHandle()?>" <?php if ($attributeKey->getAttributeKeyHandle() == $customTopicAttributeKeyHandle) {
-                            ?>selected<?php
-                            }
-                            ?>><?=$attributeKey->getAttributeKeyDisplayName()?></option>
+                        ?>selected<?php
+                    } ?>><?=$attributeKey->getAttributeKeyDisplayName()?></option>
                             <?php
-                        } ?>
+                } ?>
                     </select>
                     <div class="tree-view-container">
                         <div class="tree-view-template">
@@ -118,13 +112,12 @@ $form = $app->make('helper/form/page_selector');
                     <select class="form-control" name="relatedTopicAttributeKeyHandle" id="relatedTopicAttributeKeyHandle">
                         <option value=""><?=t('Choose topics attribute.')?></option>
                         <?php foreach ($attributeKeys as $attributeKey) {
-                            ?>
+                    ?>
                             <option value="<?=$attributeKey->getAttributeKeyHandle()?>" <?php if ($attributeKey->getAttributeKeyHandle() == $relatedTopicAttributeKeyHandle) {
-                            ?>selected<?php
-                            }
-                            ?>><?=$attributeKey->getAttributeKeyDisplayName()?></option>
+                        ?>selected<?php
+                    } ?>><?=$attributeKey->getAttributeKeyDisplayName()?></option>
                             <?php
-                        } ?>
+                } ?>
                     </select>
                 </div>
             </div>
@@ -144,8 +137,7 @@ $form = $app->make('helper/form/page_selector');
                 ];
 
                 foreach ($filterDateOptions as $filterDateOptionHandle => $filterDateOptionLabel) {
-                    $isChecked = ($filterDateOption == $filterDateOptionHandle) ? 'checked' : '';
-                    ?>
+                    $isChecked = ($filterDateOption == $filterDateOptionHandle) ? 'checked' : ''; ?>
                     <div class="radio">
                         <label>
                             <input type="radio" class='filterDateOption' name="filterDateOption" value="<?=$filterDateOptionHandle?>" <?=$isChecked?> />
@@ -222,30 +214,30 @@ $form = $app->make('helper/form/page_selector');
                 <div class="checkbox">
                     <label>
                         <input <?php if (!is_object($featuredAttribute)) {
-                            ?> disabled <?php
-                        } ?> type="checkbox" name="displayFeaturedOnly"
+                    ?> disabled <?php
+                } ?> type="checkbox" name="displayFeaturedOnly"
                              value="1" <?php if ($displayFeaturedOnly == 1) {
-                            ?> checked <?php
-                        } ?>
+                    ?> checked <?php
+                } ?>
                              style="vertical-align: middle"/>
                         <?= t('Featured pages only.') ?>
                     </label>
                     <?php if (!is_object($featuredAttribute)) {
-                        ?>
+                    ?>
                         <span class="help-block"><?=
                             t(
-                                '(<strong>Note</strong>: You must create the "is_featured" page attribute first.)');
-                            ?></span>
+                                '(<strong>Note</strong>: You must create the "is_featured" page attribute first.)'
+                            ); ?></span>
                         <?php
-                    } ?>
+                } ?>
                 </div>
 
                 <div class="checkbox">
                     <label>
                         <input type="checkbox" name="displayAliases"
                                value="1" <?php if ($displayAliases == 1) {
-                            ?> checked <?php
-                        } ?> />
+                    ?> checked <?php
+                } ?> />
                         <?= t('Display page aliases.') ?>
                     </label>
                 </div>
@@ -273,8 +265,8 @@ $form = $app->make('helper/form/page_selector');
                 <div class="checkbox">
                     <label>
                         <input type="checkbox" name="paginate" value="1" <?php if ($paginate == 1) {
-                            ?> checked <?php
-                        } ?> />
+                    ?> checked <?php
+                } ?> />
                         <?= t('Display pagination interface if more items are available than are displayed.') ?>
                     </label>
                 </div>
@@ -289,8 +281,8 @@ $form = $app->make('helper/form/page_selector');
                     <label>
                         <input type="radio" name="cParentID" id="cEverywhereField"
                                value="0" <?php if ($cParentID == 0) {
-                            ?> checked<?php
-                        } ?> />
+                    ?> checked<?php
+                } ?> />
                         <?= t('Everywhere') ?>
                     </label>
                 </div>
@@ -298,8 +290,8 @@ $form = $app->make('helper/form/page_selector');
                     <label>
                         <input type="radio" name="cParentID" id="cThisPageField"
                                value="<?= $c->getCollectionID() ?>" <?php if ($cThis) {
-                            ?> checked<?php
-                        } ?>>
+                    ?> checked<?php
+                } ?>>
                         <?= t('Beneath this page') ?>
                     </label>
                 </div>
@@ -314,8 +306,8 @@ $form = $app->make('helper/form/page_selector');
                     <label>
                         <input type="radio" name="cParentID" id="cOtherField"
                                value="OTHER" <?php if ($isOtherPage) {
-                            ?> checked<?php
-                        } ?>>
+                    ?> checked<?php
+                } ?>>
                         <?= t('Beneath another page') ?>
                     </label>
                 </div>
@@ -348,48 +340,48 @@ $form = $app->make('helper/form/page_selector');
                 <label class="control-label"><?=t('Sort')?></label>
                 <select name="orderBy" class="form-control">
                     <option value="display_asc" <?php if ($orderBy == 'display_asc') {
-                        ?> selected <?php
-                    } ?>>
+                    ?> selected <?php
+                } ?>>
                         <?= t('Sitemap order') ?>
                     </option>
                     <option value="display_desc" <?php if ($orderBy == 'display_desc') {
-                        ?> selected <?php
-                    } ?>>
+                    ?> selected <?php
+                } ?>>
                         <?= t('Reverse sitemap order') ?>
                     </option>
                     <option value="chrono_desc" <?php if ($orderBy == 'chrono_desc') {
-                        ?> selected <?php
-                    } ?>>
+                    ?> selected <?php
+                } ?>>
                         <?= t('Most recent first') ?>
                     </option>
                     <option value="chrono_asc" <?php if ($orderBy == 'chrono_asc') {
-                        ?> selected <?php
-                    } ?>>
+                    ?> selected <?php
+                } ?>>
                         <?= t('Earliest first') ?>
                     </option>
                     <option value="alpha_asc" <?php if ($orderBy == 'alpha_asc') {
-                        ?> selected <?php
-                    } ?>>
+                    ?> selected <?php
+                } ?>>
                         <?= t('Alphabetical order') ?>
                     </option>
                     <option value="alpha_desc" <?php if ($orderBy == 'alpha_desc') {
-                        ?> selected <?php
-                    } ?>>
+                    ?> selected <?php
+                } ?>>
                         <?= t('Reverse alphabetical order') ?>
                     </option>
                     <option value="modified_desc" <?php if ($orderBy == 'modified_desc') {
-                        ?> selected <?php
-                    } ?>>
+                    ?> selected <?php
+                } ?>>
                         <?= t('Most recently modified first') ?>
                     </option>
                     <option value="rated_desc" <?php if ($orderBy == 'rated_desc') {
-                        ?> selected <?php
-                    } ?>>
+                    ?> selected <?php
+                } ?>>
                         <?= t('Most rated first') ?>
                     </option>
                     <option value="random" <?php if ($orderBy == 'random') {
-                        ?> selected <?php
-                    } ?>>
+                    ?> selected <?php
+                } ?>>
                         <?= t('Random') ?>
                     </option>
                 </select>
@@ -399,26 +391,26 @@ $form = $app->make('helper/form/page_selector');
         <fieldset>
             <legend><?= t('Output') ?></legend>
             <div class="form-group">
-                <label for="btnType" class="control-label"><?=t("Button Type")?></label>
+                <label for="btnType" class="control-label"><?=t('Button Type')?></label>
                 <select id="btnType" name="btnType" ccm-passed-value="heart" class="form-control">
-                    <option value="clap"><?=t("Clap")?></option>
-                    <option value="heart" selected="selected"><?=t("Heart")?></option>
-                    <option value="like"><?=t("Like")?></option>
+                    <option value="clap"><?=t('Clap')?></option>
+                    <option value="heart" selected="selected"><?=t('Heart')?></option>
+                    <option value="like"><?=t('Like')?></option>
                 </select>
             </div>
 
             <div class="form-group">
-                <label class="control-label"><?=t("Display the total rating?")?></label>
+                <label class="control-label"><?=t('Display the total rating?')?></label>
                 <div class="radio">
                     <label>
                         <input type="radio" id="displayRatings1" name="displayRatings" value="1" class="ccm-input-radio" checked="checked">
-                        <?=t("Yes")?>
+                        <?=t('Yes')?>
                     </label>
                 </div>
                 <div class="radio">
                     <label>
                         <input type="radio" id="displayRatings2" name="displayRatings" value="0" class="ccm-input-radio">
-                        <?=t("No")?>
+                        <?=t('No')?>
                     </label>
                 </div>
             </div>
@@ -438,11 +430,11 @@ $form = $app->make('helper/form/page_selector');
                 </div>
                 <div id="ccm-pagelist-rssDetails" <?= (is_object($rssFeed) ? '' : 'style="display:none;"') ?>>
                     <?php if (is_object($rssFeed)) {
-                        ?>
+                    ?>
                         <?=t('RSS Feed can be found here: <a href="%s" target="_blank">%s</a>', $rssFeed->getFeedURL(), $rssFeed->getFeedURL())?>
                         <?php
-                    } else {
-                        ?>
+                } else {
+                    ?>
                         <div class="form-group">
                             <label class="control-label"><?= t('RSS Feed Title') ?></label>
                             <input class="form-control" id="ccm-pagelist-rssTitle" type="text" name="rssTitle"
@@ -460,7 +452,7 @@ $form = $app->make('helper/form/page_selector');
                             </div>
                         </div>
                         <?php
-                    } ?>
+                } ?>
                 </div>
             </div>
 

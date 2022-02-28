@@ -1,10 +1,12 @@
 <?php
 /**
  * @author: Biplob Hossain <biplob.ice@gmail.com>
+ *
  * @license MIT
  */
 
 namespace C5jRatings\Page;
+
 use Doctrine\DBAL\Types\Type;
 
 class PageList extends \Concrete\Core\Page\PageList
