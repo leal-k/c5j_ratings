@@ -35,4 +35,9 @@ class PageList extends \Concrete\Core\Page\PageList
     {
         $this->query->orderBy('ratings', 'DESC');
     }
+
+	public function sortByMostRecentlyRated(): void
+	{
+		$this->query->orderBy('r.createdAt', 'DESC');
+	}
 }

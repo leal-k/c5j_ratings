@@ -84,6 +84,9 @@ class Controller extends \Concrete\Block\PageList\Controller
             case 'rated_desc':
                 $this->list->sortByMostRated();
                 break;
+			case 'recently_rated_desc':
+				$this->list->sortByMostRecentlyRated();
+				break;
             default:
                 $this->list->sortByPublicDateDescending();
                 break;

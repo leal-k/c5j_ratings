@@ -379,6 +379,11 @@ $form = $app->make('helper/form/page_selector');
                 } ?>>
                         <?= t('Most rated first') ?>
                     </option>
+                    <option value="recently_rated_desc" <?php if ($orderBy == 'recently_rated_desc') {
+						?> selected <?php
+                } ?>>
+						<?= t('Most recently rated first') ?>
+                    </option>
                     <option value="random" <?php if ($orderBy == 'random') {
                     ?> selected <?php
                 } ?>>
