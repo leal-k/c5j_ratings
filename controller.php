@@ -9,12 +9,12 @@
 
 namespace Concrete\Package\C5jRatings;
 
-use C5jRatings\Entity\C5jRating;
+use C5jRatings\EventListener\PageEventListener;
+use C5jRatings\EventListener\UserEventListener;
 use Concrete\Core\Asset\Asset;
 use Concrete\Core\Asset\AssetList;
 use Concrete\Core\Backup\ContentImporter;
 use Concrete\Core\Package\Package;
-use Doctrine\ORM\EntityManagerInterface;
 
 class Controller extends Package
 {
@@ -76,38 +76,8 @@ class Controller extends Package
         $this->registerAssets();
 
 		$director = $this->app->make('director');
-		$director->addListener('on_page_delete', function ($event) {
-			$page = $event->getPageObject();
-			if($page){
-				$cID = $page->getCollectionID();
-				/** @var EntityManagerInterface $em */
-				$em = $this->app->make(EntityManagerInterface::class);
-				/** @var C5jRating $rating */
-				$ratings = $em->getRepository(C5jRating::class)->findBy(['cID' => $cID]);
-				if ($ratings) {
-					foreach ($ratings as $rating) {
-						$rating->delete();
-					}
-				}
-			}
-		});
-
-		$director->addListener('on_user_delete', function ($event) {
-			$ui = $event->getUserInfoObject();
-			if($ui){
-				$uID = $ui->getUserID();
-				/** @var EntityManagerInterface $em */
-				$em = $this->app->make(EntityManagerInterface::class);
-				/** @var C5jRating $rating */
-				$ratings = $em->getRepository(C5jRating::class)->findBy(['uID' => $uID]);
-				if ($ratings) {
-					foreach ($ratings as $rating) {
-						$rating->delete();
-					}
-				}
-			}
-		});
-
+		$director->addListener('on_page_delete', [PageEventListener::class, 'onPageDelete']);
+		$director->addListener('on_user_delete', [UserEventListener::class, 'onUserDelete']);
     }
 
     private function installXml(): void
