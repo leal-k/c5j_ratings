@@ -9,6 +9,8 @@
 
 namespace Concrete\Package\C5jRatings;
 
+use C5jRatings\EventListener\PageEventListener;
+use C5jRatings\EventListener\UserEventListener;
 use Concrete\Core\Asset\Asset;
 use Concrete\Core\Asset\AssetList;
 use Concrete\Core\Backup\ContentImporter;
@@ -72,6 +74,10 @@ class Controller extends Package
     public function on_start(): void
     {
         $this->registerAssets();
+
+		$director = $this->app->make('director');
+		$director->addListener('on_page_delete', [PageEventListener::class, 'onPageDelete']);
+		$director->addListener('on_user_delete', [UserEventListener::class, 'onUserDelete']);
     }
 
     private function installXml(): void
