@@ -1,5 +1,8 @@
 # Changelog
-
+## [0.1.3] - 2022-02-28
+### Added
+- Add sort by `Most recently rated first` option
+- 
 ## [0.1.2] - 2022-02-28
 ### Added
 - Add Dashboard Report
