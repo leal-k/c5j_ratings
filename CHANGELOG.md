@@ -1,8 +1,14 @@
 # Changelog
+## [0.1.4] - 2022-04-04
+### Fixed
+- concrete version 9
+### Added
+- Add titleFormat compatible with version 9
+
 ## [0.1.3] - 2022-02-28
 ### Added
 - Add sort by `Most recently rated first` option
-- 
+
 ## [0.1.2] - 2022-02-28
 ### Added
 - Add Dashboard Report

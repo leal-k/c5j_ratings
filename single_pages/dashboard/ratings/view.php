@@ -14,13 +14,31 @@ $dh = $app->make('helper/date');
     .ratings-header-menu{
         position: absolute;
         top: 55px;
-        right: 35px;
+        /*right: 35px;*/
     }
     div#ccm-dashboard-content-inner{
         padding-top: 0px !important;
     }
+    .ccm-header-search-form-input{
+        display: inline-block;
+    }
+    ul.ccm-header-search-navigation {
+        list-style: none;
+        text-align: right;
+        padding: 4px 0px 0px 0px;
+        margin:0px 0px 0px 0px
+    }
 </style>
-<div class="ratings-header-menu">
+<?php
+    $config = $app->make('config');
+    $codeVersion = $config->get('concrete.version');
+    if (version_compare($codeVersion, '9.0.0', '>')) {
+        $style = "style=width:346px;right:350px;";
+    } else {
+        $style = "style=right:35px;";
+    }
+?>
+<div class="ratings-header-menu" <?php echo $style;?>>
     <form class="form-inline" action="<?php echo $view->action('search_ratings'); ?>">
         <?php echo $token->output('search_ratings'); ?>
         <div class="ccm-header-search-form-input">

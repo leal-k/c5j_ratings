@@ -1,12 +1,13 @@
 <?php
 defined('C5_EXECUTE') or die('Access Denied.');
+use Concrete\Core\Page\Page;
 
 $c = Page::getCurrentPage();
-
+$app = \Concrete\Core\Support\Facade\Application::getFacadeApplication();
 /** @var \Concrete\Core\Utility\Service\Text $th */
-$th = Core::make('helper/text');
+$th = $app->make('helper/text');
 /** @var \Concrete\Core\Localization\Service\Date $dh */
-$dh = Core::make('helper/date');
+$dh = $app->make('helper/date');
 
 if (is_object($c) && $c->isEditMode() && $controller->isBlockEmpty()) {
     ?>
@@ -20,7 +21,19 @@ if (is_object($c) && $c->isEditMode() && $controller->isBlockEmpty()) {
         <?php if (isset($pageListTitle) && $pageListTitle) {
             ?>
             <div class="ccm-block-page-list-header">
+            <?php
+            $config = $app->make('config');
+            $codeVersion = $config->get('concrete.version');
+            if (version_compare($codeVersion, '9.0.0', '>')) {
+                ?>
+                <<?php echo $titleFormat; ?>><?php echo h($pageListTitle) ?></<?php echo $titleFormat; ?>>
+                <?php
+            } else {
+            ?>
                 <h5><?php echo h($pageListTitle) ?></h5>
+            <?php
+            }
+            ?>
             </div>
             <?php
         } ?>
@@ -104,7 +117,7 @@ if (is_object($c) && $c->isEditMode() && $controller->isBlockEmpty()) {
                 ?>
                         <div class="ccm-block-page-list-page-entry-thumbnail">
                             <?php
-                            $img = Core::make('html/image', [$thumbnail]);
+                            $img = $app->make('html/image', [$thumbnail]);
                 $tag = $img->getTag();
                 $tag->addClass('img-responsive');
                 echo $tag; ?>
@@ -192,7 +205,7 @@ if (is_object($c) && $c->isEditMode() && $controller->isBlockEmpty()) {
     $(document).ready(function () {
         let getUrl = "<?= URL::to($view->action('get_ratings')) ?>";
         let params = {
-            token: "<?= Core::make('token')->generate('rating') ?>",
+            token: "<?= $app->make('token')->generate('rating') ?>",
             uID: getUserID(),
         };
 
@@ -203,7 +216,7 @@ if (is_object($c) && $c->isEditMode() && $controller->isBlockEmpty()) {
     });
 
     function getUserID() {
-        let uID = "<?= Core::make('user')->getUserID() ?>";
+        let uID = "<?= $app->make('user')->getUserID() ?>";
         if (!uID) {
             const client = new ClientJS();
             uID = client.getFingerprint();
@@ -217,7 +230,7 @@ if (is_object($c) && $c->isEditMode() && $controller->isBlockEmpty()) {
         let btnType = elem.data('btn-type');
         let activeClass = btnType + '-active';
         let params = {
-            token: "<?= Core::make('token')->generate('rating') ?>",
+            token: "<?= $app->make('token')->generate('rating') ?>",
             uID: getUserID(),
             cID: cID,
             ratedValue: elem.hasClass(activeClass) ? 0 : 1

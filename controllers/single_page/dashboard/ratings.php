@@ -59,7 +59,7 @@ class Ratings extends DashboardPageController
 
             return StreamedResponse::create(
                 function () use ($app, $bom, $ratingList) {
-                    $writer = $app->build(
+                    $writer = $app->make(
                         RatingExporter::class,
                         [
                             'writer' => $this->app->make(WriterFactory::class)->createFromPath('php://output', 'w'),
