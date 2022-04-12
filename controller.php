@@ -76,8 +76,14 @@ class Controller extends Package
         $this->registerAssets();
 
 		$director = $this->app->make('director');
-		$director->addListener('on_page_delete', [PageEventListener::class, 'onPageDelete']);
-		$director->addListener('on_user_delete', [UserEventListener::class, 'onUserDelete']);
+		$director->addListener('on_page_delete', function ($e) {
+			$ratingPageEvent = $this->app->make(PageEventListener::class);
+			$ratingPageEvent->onPageDelete($e);
+		});
+		$director->addListener('on_user_delete', function ($e) {
+			$ratingUserEvent = $this->app->make(UserEventListener::class);
+			$ratingUserEvent->onUserDelete($e);
+		});
     }
 
     private function installXml(): void
