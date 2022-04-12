@@ -8,6 +8,8 @@ $app = \Concrete\Core\Support\Facade\Application::getFacadeApplication();
 $th = $app->make('helper/text');
 /** @var \Concrete\Core\Localization\Service\Date $dh */
 $dh = $app->make('helper/date');
+$pages = $pages ?? [];
+$showPagination = $showPagination ?? [];
 
 if (is_object($c) && $c->isEditMode() && $controller->isBlockEmpty()) {
     ?>

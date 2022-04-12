@@ -60,6 +60,8 @@ use Concrete\Core\Form\Service\Widget\DateTime;
 /** @var BlockType $thumbnailAttribute */
 /** @var bool $isOtherPage */
 /** @var Feed $rssFeed */
+/** @var string $btnType */
+$btnType = $btnType ?? 'Heart';
 
 if (!isset($filterDateDays)) {
     $filterDateDays = false;
@@ -705,7 +707,7 @@ echo $userInterface->tabs([
     Concrete.event.publish('pagelist.edit.open');
     $(function() {
         $("ul.nav.nav-tabs > li > a").on("click", function() {
-            if ($(this).attr("data-tab") == 'page-list-preview') {
+            if ($(this).attr("data-tab") == 'page-list-preview' || $(this).attr("id") == "page-list-preview-tab") {
                 $("#page-list-preview").addClass("active");
             } else {
                 $("#page-list-preview").removeClass("active");

@@ -9,6 +9,8 @@ $form = $app->make('helper/form');
 $token = $app->make('helper/validation/token');
 /* @var $dh \Concrete\Core\Localization\Service\Date */
 $dh = $app->make('helper/date');
+/** @var string $rated_date */
+$rated_date = $rated_date ?? null;
 ?>
 <style>
     .ratings-header-menu{
