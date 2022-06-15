@@ -5,6 +5,10 @@
  *
  * @var \Concrete\Core\Form\Service\Form $form
  */
+/** @var string $btnType */
+$btnType = $btnType ?? 'Heart';
+/** @var bool $displayRatings */
+$displayRatings = $displayRatings ?? 0;
 ?>
 <fieldset>
     <div class="form-group">

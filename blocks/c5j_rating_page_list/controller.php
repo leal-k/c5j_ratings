@@ -13,7 +13,10 @@ use Concrete\Core\Attribute\Key\CollectionKey;
 use Concrete\Core\Page\Page;
 use Concrete\Core\Tree\Node\Node;
 use Concrete\Core\User\User;
-use Core;
+use Concrete\Core\Block\BlockType\BlockType;
+use Concrete\Core\Block\View\BlockView;
+use Concrete\Core\Http\ResponseFactoryInterface;
+use Concrete\Core\Attribute\Key\CollectionKey as CollectionAttributeKey;
 
 class Controller extends \Concrete\Block\PageList\Controller
 {
@@ -28,6 +31,11 @@ class Controller extends \Concrete\Block\PageList\Controller
 
     /** @var \Concrete\Core\Validation\CSRF\Token */
     protected $token;
+	
+	public $filterByRelated;
+	public $filterByUserRated;
+	public $miniNumOfRatings;
+	public $numOfRatings;
 
     public function getBlockTypeName(): string
     {
@@ -50,7 +58,75 @@ class Controller extends \Concrete\Block\PageList\Controller
     {
         $this->requireAsset('c5j_ratings');
     }
+    
+	
+	public function action_preview_pane()
+	{
+		//$bt = BlockType::getByHandle('c5j_rating_page_list');
+		$bt = BlockType::getByHandle('page_list');
+		$controller = $bt->getController();
 
+		// @TODO - clean up this old code.
+
+		$_REQUEST['num'] = ($_REQUEST['num'] > 0) ? $_REQUEST['num'] : 0;
+		$_REQUEST['cThis'] = ($_REQUEST['cParentID'] == $_REQUEST['current_page']) ? '1' : '0';
+		$_REQUEST['cParentID'] = ($_REQUEST['cParentID'] == 'OTHER') ? $_REQUEST['cParentIDValue'] : $_REQUEST['cParentID'];
+
+		if ($_REQUEST['filterDateOption'] != 'between') {
+			$_REQUEST['filterDateStart'] = null;
+			$_REQUEST['filterDateEnd'] = null;
+		}
+
+		if ($_REQUEST['filterDateOption'] == 'past') {
+			$_REQUEST['filterDateDays'] = $_REQUEST['filterDatePast'];
+		} elseif ($_REQUEST['filterDateOption'] == 'future') {
+			$_REQUEST['filterDateDays'] = $_REQUEST['filterDateFuture'];
+		} else {
+			$_REQUEST['filterDateDays'] = null;
+		}
+
+		$controller->num = $_REQUEST['num'];
+		$controller->cParentID = $_REQUEST['cParentID'];
+		$controller->cThis = $_REQUEST['cThis'];
+		$controller->orderBy = $_REQUEST['orderBy'];
+		$controller->ptID = $_REQUEST['ptID'];
+		$controller->rss = $_REQUEST['rss'];
+		$controller->displayFeaturedOnly = $_REQUEST['displayFeaturedOnly'] ?? false;
+		$controller->displayAliases = $_REQUEST['displayAliases'] ?? false;
+		$controller->paginate = $_REQUEST['paginate'] ?? false;
+		$controller->enableExternalFiltering = $_REQUEST['enableExternalFiltering'] ?? false;
+		$controller->filterByRelated = $_REQUEST['filterByRelated'] ?? false;
+		$controller->relatedTopicAttributeKeyHandle = $_REQUEST['relatedTopicAttributeKeyHandle'];
+		$controller->filterByCustomTopic = ($_REQUEST['topicFilter'] == 'custom') ? '1' : '0';
+		$controller->customTopicAttributeKeyHandle = $_REQUEST['customTopicAttributeKeyHandle'];
+		$controller->customTopicTreeNodeID = $_REQUEST['customTopicTreeNodeID'];
+		$controller->includeAllDescendents = $_REQUEST['includeAllDescendents'] ?? false;
+		$controller->includeDate = $_REQUEST['includeDate'] ?? false;
+		$controller->displayThumbnail = $_REQUEST['displayThumbnail'] ?? false;
+		$controller->includeDescription = $_REQUEST['includeDescription'] ?? false;
+		$controller->useButtonForLink = $_REQUEST['useButtonForLink'] ?? false;
+		$controller->filterDateOption = $_REQUEST['filterDateOption'];
+		$controller->filterDateStart = $_REQUEST['filterDateStart'];
+		$controller->filterDateEnd = $_REQUEST['filterDateEnd'];
+		$controller->filterDateDays = $_REQUEST['filterDateDays'];
+
+		$controller->filterByCustomTopic = $_REQUEST['filterByCustomTopic'] ?? false;
+		$controller->filterByUserRated = $_REQUEST['filterByUserRated'] ?? false;
+		$controller->miniNumOfRatings = $_REQUEST['miniNumOfRatings'] ?? false;
+		$controller->numOfRatings = $_REQUEST['numOfRatings'] ?? '0';
+
+		$controller->set('includeEntryText', true);
+		$controller->set('includeName', true);
+		$controller->set('displayThumbnail', $controller->displayThumbnail);
+		$bv = new BlockView($bt);
+		ob_start();
+		$bv->render('view');
+		$content = ob_get_contents();
+		ob_end_clean();
+
+		return $this->app->make(ResponseFactoryInterface::class)->create($content);
+	}
+	
     public function on_start()
     {
         $this->list = new PageList();
@@ -92,7 +168,7 @@ class Controller extends \Concrete\Block\PageList\Controller
                 break;
         }
 
-        $now = Core::make('helper/date')->toDB();
+        $now = $this->app->make('helper/date')->toDB();
         $end = $start = null;
 
         switch ($this->filterDateOption) {
@@ -212,6 +288,12 @@ class Controller extends \Concrete\Block\PageList\Controller
 
     public function getPassThruActionAndParameters($parameters): array
     {
+	    if ($parameters[0] == 'preview_pane') {
+		    $method = 'action_' . $parameters[0];
+		    $parameters = array_slice($parameters, 1);
+		    return [$method, $parameters];
+	    }
+    	
         if ($parameters[0] == 'rate') {
             $method = 'action_rate';
             $parameters = array_slice($parameters, 1);
@@ -221,7 +303,7 @@ class Controller extends \Concrete\Block\PageList\Controller
         } elseif ($parameters[0] == 'tag') {
             $method = 'action_filter_by_tag';
             $parameters = array_slice($parameters, 1);
-        } elseif (Core::make('helper/validation/numbers')->integer($parameters[0])) {
+        } elseif ($this->app->make('helper/validation/numbers')->integer($parameters[0])) {
             // then we're going to treat this as a year.
             $method = 'action_filter_by_date';
             $parameters[0] = (int) ($parameters[0]);
@@ -237,6 +319,10 @@ class Controller extends \Concrete\Block\PageList\Controller
 
     public function isValidControllerTask($method, $parameters = []): bool
     {
+	    if ($method == 'action_preview_pane') {
+		    return true;
+	    }
+    	
         if ($method === 'action_filter_by_date') {
             // Parameter 0 must be set
             if (!isset($parameters[0]) || $parameters[0] < 0 || $parameters[0] > 9999) {

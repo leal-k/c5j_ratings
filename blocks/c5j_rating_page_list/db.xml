@@ -129,6 +129,10 @@
     </field>
     <field name="btnType" type="string" size="16"/>
     <field name="displayRatings" type="boolean" />
+    <field name="titleFormat" type="string" size="20">
+      <default value="h5" />
+      <notnull/>
+    </field>
     <index name="ptID">
       <col>ptID</col>
     </index>

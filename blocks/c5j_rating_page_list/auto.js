@@ -1,6 +1,6 @@
 var container, preview_container, preview_loader, preview_render;
 var pageList ={
-	servicesDir: $("input[name=pageListToolsDir]").val(),
+	previewPane: $("input[name=pageListPreviewPane]").val(),
 	init:function(){
 		this.blockForm=document.forms['ccm-block-form'];
 		this.cParentIDRadios=this.blockForm.cParentID;
@@ -60,13 +60,10 @@ var pageList ={
 		}
 	},
 	ratingsShown:function(cb){
-		//var truncateTxt=$('#ccm-pagelist-truncateTxt');
 		var R=$('#ccm-pagelist-numOfRatings');
 		if(cb.checked){
-			//truncateTxt.removeClass('faintText');
 			R.attr('disabled',false);
 		}else{
-			//truncateTxt.addClass('faintText');
 			R.attr('disabled',true);
 		}
 	},
@@ -115,8 +112,7 @@ var pageList ={
             value: CCM_CID
         });
 
-
-        $.get(this.servicesDir + 'preview_pane', query, function(msg) {
+        $.get(this.previewPane, query, function(msg) {
             preview_container.find('div.render').html(msg);
             pageList.hideLoader();
         }).fail(function() {
@@ -130,9 +126,9 @@ var pageList ={
             group, left;
 
         if (element.is('input[type=checkbox]')) {
-            group = element.closest('div.checkbox');
+            group = element.closest('div.form-check');
         } else if (element.is('input[type=radio]')) {
-            group = element.closest('div.radio');
+            group = element.closest('div.form-check');
         } else {
             group = element.closest('div.form-group');
         }
@@ -154,7 +150,7 @@ Concrete.event.bind('pagelist.edit.open', function() {
     pageList.init();
 
     container = $('div.pagelist-form');
-    preview_container = $('#ccm-tab-content-page-list-preview div.preview');
+    preview_container = $('#page-list-preview');
     preview_loader = container.find('div.loader');
     preview_render = preview_container.children('div.render');
 
