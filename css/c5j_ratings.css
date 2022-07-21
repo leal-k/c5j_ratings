@@ -15,16 +15,19 @@
 .clap-btn {
     background: url('../images/claps.png') no-repeat 0% 50%;
     background-size: 900%;
+    float: left;
 }
 
 .heart-btn {
     background: url('../images/heart.png') no-repeat 0% 50%;
     background-size: 2900%;
+    float: left;
 }
 
 .like-btn {
     background: url('../images/like.png') no-repeat 0% 50%;
     background-size: 200%;
+    float: left;
 }
 
 .clap-active,
@@ -49,4 +52,12 @@
     0%   { background-position: left;  }
     50%  { background-position: right; }
     100% { background-position: right; }
+}
+.ratings-wrapper {
+    height: 70px;
+}
+.num-ratings {
+    float: left;
+    padding-top: 30px;
+    padding-bottom: 30px;
 }
