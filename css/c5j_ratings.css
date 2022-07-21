@@ -53,7 +53,7 @@
     50%  { background-position: right; }
     100% { background-position: right; }
 }
-.ratings-count {
+.ratings-wrapper {
     height: 70px;
 }
 .num-ratings {

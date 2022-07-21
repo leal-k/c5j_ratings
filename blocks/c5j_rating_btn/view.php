@@ -9,7 +9,7 @@ $cID = Page::getCurrentPage()->getCollectionID();
 $ratingBtnID = sprintf('rating-%d-%d', $bID, $cID);
 ?>
 
-<div class="ratings-count">
+<div class="ratings-wrapper">
     <span id="<?= $ratingBtnID ?>" class="rating-<?= $cID ?> <?= $btnType ?>-btn" data-btn-type="<?= $btnType ?>" onclick="addRating($(this), <?= $cID ?>)"></span>
     <?php if ($displayRatings) { ?>
         <span class="num-ratings"><?= $ratings['ratings'] ?? 0 ?></span>
