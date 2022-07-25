@@ -28,7 +28,10 @@ class PageList extends \Concrete\Core\Page\PageList
 
     public function filterByMinimumNumberOfRatings(int $num = 0): void
     {
-        $this->query->andHaving($this->query->expr()->gte('SUM(r.ratedValue)', $num));
+        if ($num > 0) {
+            $this->query->andWhere($this->query->expr()->in('p.cID', 'SELECT cID FROM C5jRatings GROUP BY cID HAVING SUM(ratedValue) >= :num'));
+            $this->query->setParameter('num', $num, Type::INTEGER);
+        }
     }
 
     public function sortByMostRated(): void
