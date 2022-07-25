@@ -1,9 +1,10 @@
 # Changelog
-## [0.1.4] - 2022-04-04
+## [0.1.4] - 2022-07-25
 ### Fixed
-- concrete version 9
+- Pagination bug
+- Button position CSS
 ### Added
-- Add titleFormat compatible with version 9
+- Concrete CMS version 9 Compatibility
 
 ## [0.1.3] - 2022-02-28
 ### Added
