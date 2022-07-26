@@ -117,7 +117,7 @@ echo $userInterface->tabs([
 ?>
 
 <div class="ccm-tab-content tab-content" id="ccm-tab-content-page-list-settings">
-    <div class="tab-pane show active pagelist-form" id="page-list-settings" role="tabpanel">
+    <div class="tab-pane active pagelist-form" id="page-list-settings" role="tabpanel">
         <input type="hidden" name="pageListPreviewPane" value="<?= h($controller->getActionURL('preview_pane')) ?>"/>
         <fieldset>
             <div class="form-group">
@@ -709,8 +709,10 @@ echo $userInterface->tabs([
         $("ul.nav.nav-tabs > li > a").on("click", function() {
             if ($(this).attr("data-tab") == 'page-list-preview' || $(this).attr("id") == "page-list-preview-tab") {
                 $("#page-list-preview").addClass("active");
+                $("#page-list-settings").removeClass("active");
             } else {
                 $("#page-list-preview").removeClass("active");
+                $("#page-list-settings").addClass("active");
             }
         });
         
