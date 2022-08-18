@@ -42,7 +42,7 @@ class Controller extends Package
      */
     public function getPackageName(): string
     {
-        return t('C5j Ratings');
+        return t('Macareux Ratings');
     }
 
     /**
