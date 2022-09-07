@@ -17,6 +17,7 @@ use Concrete\Core\Block\BlockType\BlockType;
 use Concrete\Core\Block\View\BlockView;
 use Concrete\Core\Http\ResponseFactoryInterface;
 use Concrete\Core\Attribute\Key\CollectionKey as CollectionAttributeKey;
+use Concrete\Core\Http\Request;
 
 class Controller extends \Concrete\Block\PageList\Controller
 {
@@ -62,58 +63,59 @@ class Controller extends \Concrete\Block\PageList\Controller
 	
 	public function action_preview_pane()
 	{
-		//$bt = BlockType::getByHandle('c5j_rating_page_list');
 		$bt = BlockType::getByHandle('page_list');
 		$controller = $bt->getController();
-
-		// @TODO - clean up this old code.
-
-		$_REQUEST['num'] = ($_REQUEST['num'] > 0) ? $_REQUEST['num'] : 0;
-		$_REQUEST['cThis'] = ($_REQUEST['cParentID'] == $_REQUEST['current_page']) ? '1' : '0';
-		$_REQUEST['cParentID'] = ($_REQUEST['cParentID'] == 'OTHER') ? $_REQUEST['cParentIDValue'] : $_REQUEST['cParentID'];
-
-		if ($_REQUEST['filterDateOption'] != 'between') {
-			$_REQUEST['filterDateStart'] = null;
-			$_REQUEST['filterDateEnd'] = null;
-		}
-
-		if ($_REQUEST['filterDateOption'] == 'past') {
-			$_REQUEST['filterDateDays'] = $_REQUEST['filterDatePast'];
-		} elseif ($_REQUEST['filterDateOption'] == 'future') {
-			$_REQUEST['filterDateDays'] = $_REQUEST['filterDateFuture'];
+		
+		$request = $this->request;
+		$num = ($request->query->get('num') > 0) ? $request->query->get('num') : 0;
+		$cThis = ($request->query->get('cParentID') == $request->query->get('current_page')) ?  '1' : '0';
+		$cParentID = ($request->query->get('cParentID') == 'OTHER') ?  $request->query->get('cParentIDValue') : $request->query->get('cParentID');
+		
+		if ($request->query->get('filterDateOption') != 'between') {
+			$filterDateStart = null;
+			$filterDateEnd = null;
 		} else {
-			$_REQUEST['filterDateDays'] = null;
+			$filterDateStart = $request->query->get('filterDateStart');
+			$filterDateEnd = $request->query->get('filterDateEnd');
 		}
 
-		$controller->num = $_REQUEST['num'];
-		$controller->cParentID = $_REQUEST['cParentID'];
-		$controller->cThis = $_REQUEST['cThis'];
-		$controller->orderBy = $_REQUEST['orderBy'];
-		$controller->ptID = $_REQUEST['ptID'];
-		$controller->rss = $_REQUEST['rss'];
-		$controller->displayFeaturedOnly = $_REQUEST['displayFeaturedOnly'] ?? false;
-		$controller->displayAliases = $_REQUEST['displayAliases'] ?? false;
-		$controller->paginate = $_REQUEST['paginate'] ?? false;
-		$controller->enableExternalFiltering = $_REQUEST['enableExternalFiltering'] ?? false;
-		$controller->filterByRelated = $_REQUEST['filterByRelated'] ?? false;
-		$controller->relatedTopicAttributeKeyHandle = $_REQUEST['relatedTopicAttributeKeyHandle'];
-		$controller->filterByCustomTopic = ($_REQUEST['topicFilter'] == 'custom') ? '1' : '0';
-		$controller->customTopicAttributeKeyHandle = $_REQUEST['customTopicAttributeKeyHandle'];
-		$controller->customTopicTreeNodeID = $_REQUEST['customTopicTreeNodeID'];
-		$controller->includeAllDescendents = $_REQUEST['includeAllDescendents'] ?? false;
-		$controller->includeDate = $_REQUEST['includeDate'] ?? false;
-		$controller->displayThumbnail = $_REQUEST['displayThumbnail'] ?? false;
-		$controller->includeDescription = $_REQUEST['includeDescription'] ?? false;
-		$controller->useButtonForLink = $_REQUEST['useButtonForLink'] ?? false;
-		$controller->filterDateOption = $_REQUEST['filterDateOption'];
-		$controller->filterDateStart = $_REQUEST['filterDateStart'];
-		$controller->filterDateEnd = $_REQUEST['filterDateEnd'];
-		$controller->filterDateDays = $_REQUEST['filterDateDays'];
+		if ($request->query->get('filterDateOption') == 'past') {
+			$filterDateDays = $request->query->get('filterDatePast');
+		} elseif ($request->query->get('filterDateOption') == 'future') {
+			$filterDateDays = $request->query->get('filterDateFuture');
+		} else {
+			$filterDateDays = null;
+		}
 
-		$controller->filterByCustomTopic = $_REQUEST['filterByCustomTopic'] ?? false;
-		$controller->filterByUserRated = $_REQUEST['filterByUserRated'] ?? false;
-		$controller->miniNumOfRatings = $_REQUEST['miniNumOfRatings'] ?? false;
-		$controller->numOfRatings = $_REQUEST['numOfRatings'] ?? '0';
+		$controller->num = $num;
+		$controller->cParentID = $cParentID;
+		$controller->cThis = $cThis;
+		$controller->orderBy = $request->query->get('orderBy');
+		$controller->ptID = $request->query->get('ptID');
+		$controller->rss = $request->query->get('rss');
+		$controller->displayFeaturedOnly = $request->query->get('displayFeaturedOnly') ?? false;
+		$controller->displayAliases = $request->query->get('displayAliases') ?? false;
+		$controller->paginate = $request->query->get('paginate') ?? false;
+		$controller->enableExternalFiltering = $request->query->get('enableExternalFiltering') ?? false;
+		$controller->filterByRelated = $request->query->get('filterByRelated') ?? false;
+		$controller->relatedTopicAttributeKeyHandle = $request->query->get('relatedTopicAttributeKeyHandle');
+		$controller->filterByCustomTopic = ($request->query->get('topicFilter') == 'custom') ? '1' : '0';
+		$controller->customTopicAttributeKeyHandle = $request->query->get('customTopicAttributeKeyHandle');
+		$controller->customTopicTreeNodeID = $request->query->get('customTopicTreeNodeID');
+		$controller->includeAllDescendents = $request->query->get('includeAllDescendents') ?? false;
+		$controller->includeDate = $request->query->get('includeDate') ?? false;
+		$controller->displayThumbnail = $request->query->get('displayThumbnail') ?? false;
+		$controller->includeDescription = $request->query->get('includeDescription') ?? false;
+		$controller->useButtonForLink = $request->query->get('useButtonForLink') ?? false;
+		$controller->filterDateOption = $request->query->get('filterDateOption');
+		$controller->filterDateStart = $filterDateStart;
+		$controller->filterDateEnd = $filterDateEnd;
+		$controller->filterDateDays = $filterDateDays;
+
+		$controller->filterByCustomTopic = $request->query->get('filterByCustomTopic') ?? false;
+		$controller->filterByUserRated = $request->query->get('filterByUserRated') ?? false;
+		$controller->miniNumOfRatings = $request->query->get('miniNumOfRatings') ?? false;
+		$controller->numOfRatings = $request->query->get('numOfRatings') ?? '0';
 
 		$controller->set('includeEntryText', true);
 		$controller->set('includeName', true);
