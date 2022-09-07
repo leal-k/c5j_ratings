@@ -119,7 +119,7 @@ if (is_object($c) && $c->isEditMode() && $controller->isBlockEmpty()) {
                 ?>
                         <div class="ccm-block-page-list-page-entry-thumbnail">
                             <?php
-                            $img = $app->make('html/image', [$thumbnail]);
+                            $img = $app->make('html/image', ['f' => $thumbnail]);
                 $tag = $img->getTag();
                 $tag->addClass('img-responsive');
                 echo $tag; ?>
