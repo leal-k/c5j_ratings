@@ -4,6 +4,10 @@
  *
  * @license MIT
  */
+use Concrete\Core\Support\Facade\Facade;
+use Concrete\Core\Support\Facade\Url;
+use Concrete\Core\Page\Page;
+$app = Facade::getFacadeApplication();
 $btnType = $btnType ?? 'clap';
 $cID = Page::getCurrentPage()->getCollectionID();
 $ratingBtnID = sprintf('rating-%d-%d', $bID, $cID);
@@ -20,7 +24,7 @@ $ratingBtnID = sprintf('rating-%d-%d', $bID, $cID);
     $(document).ready(function () {
         let getUrl = "<?= URL::to($view->action('get_ratings')) ?>";
         let params = {
-            token: "<?= Core::make('token')->generate('rating') ?>",
+            token: "<?= $app->make('token')->generate('rating') ?>",
             uID: getUserID(),
             cID: '<?= $cID ?>',
         };
@@ -28,7 +32,7 @@ $ratingBtnID = sprintf('rating-%d-%d', $bID, $cID);
     });
 
     function getUserID() {
-        let uID = "<?= Core::make('user')->getUserID() ?>";
+        let uID = "<?= $app->make('user')->getUserID() ?>";
         if (!uID) {
             const client = new ClientJS();
             uID = client.getFingerprint();
@@ -42,7 +46,7 @@ $ratingBtnID = sprintf('rating-%d-%d', $bID, $cID);
         let btnType = elem.data('btn-type');
         let activeClass = btnType + '-active';
         let params = {
-            token: "<?= Core::make('token')->generate('rating') ?>",
+            token: "<?= $app->make('token')->generate('rating') ?>",
             uID: getUserID(),
             cID: cID,
             ratedValue: elem.hasClass(activeClass) ? 0 : 1

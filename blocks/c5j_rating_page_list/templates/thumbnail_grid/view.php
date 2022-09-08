@@ -1,9 +1,10 @@
 <?php
 defined('C5_EXECUTE') or die('Access Denied.');
+use Concrete\Core\Support\Facade\Facade;
+use Concrete\Core\Page\Page;
 
-// TODO::Display the rating button on view
-
-$th = Loader::helper('text');
+$app = Facade::getFacadeApplication();
+$th = $app->make('helper/text');
 $c = Page::getCurrentPage();
 ?>
 
@@ -37,7 +38,7 @@ $c = Page::getCurrentPage();
         <?php if (is_object($thumbnail)): ?>
             <div class="ccm-block-page-list-page-entry-grid-thumbnail">
                 <a href="<?php echo $url ?>" target="<?php echo $target ?>"><?php
-                $img = Core::make('html/image', [$thumbnail]);
+                $img = $app->make('html/image', ['f' => $thumbnail]);
                 $tag = $img->getTag();
                 $tag->addClass('img-responsive');
                 echo $tag;
