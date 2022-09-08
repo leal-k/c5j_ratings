@@ -73,7 +73,7 @@ class C5jRating
 
     public static function getByBIDAndUID(int $bID, int $uID): ?object
     {
-        $em = \ORM::entityManager();
+        $em = \Concrete\Core\Support\Facade\DatabaseORM::entityManager();
 
         return $em->getRepository(__CLASS__)
             ->findOneBy(['bID' => $bID, 'uID' => $uID]);
@@ -81,7 +81,7 @@ class C5jRating
 
     public static function getByCIDAndUID(int $cID, int $uID): ?object
     {
-        $em = \ORM::entityManager();
+        $em = \Concrete\Core\Support\Facade\DatabaseORM::entityManager();
 
         return $em->getRepository(__CLASS__)
             ->findOneBy(['cID' => $cID, 'uID' => $uID]);
