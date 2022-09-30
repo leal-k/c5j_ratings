@@ -55,6 +55,7 @@
 }
 .ratings-wrapper {
     height: 70px;
+    display: inline-block;
 }
 .num-ratings {
     float: left;
