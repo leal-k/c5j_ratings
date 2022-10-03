@@ -31,7 +31,7 @@ class Controller extends Package
     /**
      * @var string package version
      */
-    protected $pkgVersion = '0.1.6';
+    protected $pkgVersion = '0.1.7';
 
     protected $pkgAutoloaderRegistries = [
         'src' => '\C5jRatings',
@@ -105,7 +105,7 @@ class Controller extends Package
         $al->register(
             'javascript',
             'client',
-            'js/client.min.js',
+            'js/client.base.min.js',
             ['position' => Asset::ASSET_POSITION_FOOTER],
             'c5j_ratings'
         );
