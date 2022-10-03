@@ -42,6 +42,7 @@ class Controller extends BlockController
 
     public function registerViewAssets($outputContent = ''): void
     {
+        $this->requireAsset('jquery');
         $this->requireAsset('c5j_ratings');
     }
 
