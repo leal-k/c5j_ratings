@@ -13,19 +13,19 @@
 }
 
 .clap-btn {
-    background: url('../images/claps.png') no-repeat 0% 50%;
+    background: url('../images/claps.png') no-repeat 0 50%;
     background-size: 900%;
     float: left;
 }
 
 .heart-btn {
-    background: url('../images/heart.png') no-repeat 0% 50%;
+    background: url('../images/heart.png') no-repeat 0 50%;
     background-size: 2900%;
     float: left;
 }
 
 .like-btn {
-    background: url('../images/like.png') no-repeat 0% 50%;
+    background: url('../images/like.png') no-repeat 0 50%;
     background-size: 200%;
     float: left;
 }
@@ -54,7 +54,7 @@
     100% { background-position: right; }
 }
 .ratings-wrapper {
-    height: 70px;
+    height: 80px;
     display: inline-block;
 }
 .num-ratings {
