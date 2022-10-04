@@ -40,7 +40,7 @@ class Controller extends \Concrete\Block\PageList\Controller
 
     public function getBlockTypeName(): string
     {
-        return t('C5j Rating Page List');
+        return t('Rating Page List');
     }
 
     public function getBlockTypeDescription(): string

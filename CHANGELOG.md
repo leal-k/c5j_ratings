@@ -1,4 +1,8 @@
 # Changelog
+## [1.0.0] - 2022-10-04
+
+- Initial release to the Marketplace
+
 ## [0.1.6] - 2022-09-07
 ### Fixed
 - View design compatibility with v8 and v9

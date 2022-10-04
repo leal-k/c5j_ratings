@@ -26,12 +26,12 @@ class Controller extends Package
     /**
      * @var string required concrete5 version
      */
-    protected $appVersionRequired = '8.1.0';
+    protected $appVersionRequired = '8.5.0';
 
     /**
      * @var string package version
      */
-    protected $pkgVersion = '0.1.7';
+    protected $pkgVersion = '1.0.0';
 
     protected $pkgAutoloaderRegistries = [
         'src' => '\C5jRatings',

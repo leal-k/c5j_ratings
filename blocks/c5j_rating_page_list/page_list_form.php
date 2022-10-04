@@ -440,7 +440,7 @@ echo $userInterface->tabs([
             ?>
         </div>
         <div class="form-group">
-            <label class="control-label"><?=t('Display the total rating?')?></label>
+            <label class="control-label form-label"><?=t('Display the total rating?')?></label>
             <div class="radio">
                 <label>
                     <input type="radio" id="displayRatings1" name="displayRatings" value="1" class="ccm-input-radio" checked="checked">

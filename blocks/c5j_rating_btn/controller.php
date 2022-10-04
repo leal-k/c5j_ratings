@@ -25,7 +25,7 @@ class Controller extends BlockController
 
     public function getBlockTypeName(): string
     {
-        return t('C5j Rating Button');
+        return t('Rating Button');
     }
 
     public function getBlockTypeDescription(): string

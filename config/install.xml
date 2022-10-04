@@ -4,12 +4,6 @@
         <blocktype handle="c5j_rating_btn" package="c5j_ratings"/>
         <blocktype handle="c5j_rating_page_list" package="c5j_ratings"/>
     </blocktypes>
-    <blocktypesets>
-        <blocktypeset handle="c5j" name="concrete5 Japan" package="c5j_ratings">
-            <blocktype handle="c5j_rating_btn"/>
-            <blocktype handle="c5j_rating_page_list"/>
-        </blocktypeset>
-    </blocktypesets>
     <singlepages>
         <page name="Ratings"
               path="/dashboard/ratings"
