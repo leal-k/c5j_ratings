@@ -1,4 +1,8 @@
 # Changelog
+## [1.0.1] - 2022-10-17
+
+- Fix php8 compatible issue due to core bug
+
 ## [1.0.0] - 2022-10-04
 
 - Initial release to the Marketplace

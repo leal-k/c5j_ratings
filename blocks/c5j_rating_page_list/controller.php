@@ -10,6 +10,7 @@ namespace Concrete\Package\C5jRatings\Block\C5jRatingPageList;
 use C5jRatings\Page\PageList;
 use C5jRatings\Traits\RatingTrait;
 use Concrete\Core\Attribute\Key\CollectionKey;
+use Concrete\Core\Http\RequestBase;
 use Concrete\Core\Page\Page;
 use Concrete\Core\Tree\Node\Node;
 use Concrete\Core\User\User;
@@ -17,7 +18,6 @@ use Concrete\Core\Block\BlockType\BlockType;
 use Concrete\Core\Block\View\BlockView;
 use Concrete\Core\Http\ResponseFactoryInterface;
 use Concrete\Core\Attribute\Key\CollectionKey as CollectionAttributeKey;
-use Concrete\Core\Http\Request;
 
 class Controller extends \Concrete\Block\PageList\Controller
 {
@@ -37,6 +37,14 @@ class Controller extends \Concrete\Block\PageList\Controller
 	public $filterByUserRated;
 	public $miniNumOfRatings;
 	public $numOfRatings;
+
+    /**
+     * A simple hack to fix the PHP8 compatibility issue with core.
+     * @See https://github.com/concretecms/concretecms/pull/11017/files
+     *
+     * @var array
+     */
+    protected $requestArray;
 
     public function getBlockTypeName(): string
     {
@@ -340,5 +348,34 @@ class Controller extends \Concrete\Block\PageList\Controller
         }
 
         return true;
+    }
+
+    /**
+     * A simple hack to fix the PHP8 compatibility issue with core.
+     * @See https://github.com/concretecms/concretecms/pull/11017/files
+     */
+    public function post($field = false, $defaultValue = null)
+    {
+        // the only post that matters is the one for this attribute's name space
+        $req = ($this->requestArray == false) ? $_POST : $this->requestArray;
+        if (isset($req['_bf']) && is_array($req['_bf'])) {
+            $identifier = $this->identifier;
+            $b = $this->getBlockObject();
+            if (is_object($b)) {
+                $xc = $b->getBlockCollectionObject();
+                if (is_object($xc)) {
+                    $identifier .= '_' . $xc->getCollectionID();
+                }
+            }
+
+            $p = $req['_bf'][$identifier];
+            if ($field) {
+                return $p[$field];
+            }
+
+            return $p;
+        }
+
+        return RequestBase::post($field, $defaultValue);
     }
 }
