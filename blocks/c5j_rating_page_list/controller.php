@@ -65,7 +65,7 @@ class Controller extends \Concrete\Block\PageList\Controller
 
     public function registerViewAssets($outputContent = '')
     {
-        $this->requireAsset('jquery');
+        $this->requireAsset('javascript', 'jquery');
         $this->requireAsset('c5j_ratings');
     }
     
