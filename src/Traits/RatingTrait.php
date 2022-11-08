@@ -12,6 +12,7 @@ use Concrete\Core\Http\Request;
 use Concrete\Core\Logging\Channels;
 use Concrete\Core\Support\Facade\Application;
 use Concrete\Core\User\User;
+use Concrete\Core\Validation\CSRF\Token;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 trait RatingTrait
@@ -28,7 +29,7 @@ trait RatingTrait
             return JsonResponse::create($this->getRatings($cID, $uID));
         }
 
-            return JsonResponse::create($this->token->getErrorMessage());
+        return JsonResponse::create($this->token->getErrorMessage());
     }
 
     public function action_get_ratings(int $bID)
@@ -44,31 +45,29 @@ trait RatingTrait
             return JsonResponse::create($this->token->getErrorMessage());
     }
 
-    public function generate($action = '', $time = null, $userID = 0)
+    public function generate($action = '', $time = null, $uID = 0): string
     {
         $app = Application::getFacadeApplication();
-        $u = User::getByUserID($userID);
-        $uID = $u->getUserID();
         if (!$uID) {
-            $uID = 0;
+            $u = $app->make(User::class);
+            $uID = (int) $u->getUserID();
         }
         if (!$time) {
             $time = time();
         }
-        $app = Application::getFacadeApplication();
         $config = $app->make('config/database');
 
         return $time . ':' . md5($time . ':' . $uID . ':' . $action . ':' . $config->get('concrete.security.token.validation'));
     }
 
-    public function validate($action = '', $token = null, $userID = 0)
+    public function validate($action = '', $token = null, $uID = 0): bool
     {
         $app = Application::getFacadeApplication();
-        if ($token == null) {
+        if ($token === null) {
             $request = $app->make(Request::class);
-            $token = $request->request->get(static::DEFAULT_TOKEN_NAME);
+            $token = $request->request->get(Token::DEFAULT_TOKEN_NAME);
             if ($token === null) {
-                $token = $request->query->get(static::DEFAULT_TOKEN_NAME);
+                $token = $request->query->get(Token::DEFAULT_TOKEN_NAME);
             }
         }
         if (is_string($token)) {
@@ -76,21 +75,20 @@ trait RatingTrait
             if ($parts[0] && isset($parts[1])) {
                 $time = $parts[0];
                 $hash = $parts[1];
-                $compHash = $this->generate($action, $time, $userID);
+                $compHash = $this->generate($action, $time, $uID);
                 $now = time();
 
                 if (substr($compHash, strpos($compHash, ':') + 1) == $hash) {
                     $diff = $now - $time;
                     //hash is only valid if $diff is less than VALID_HASH_TIME_RECORD
-                    return $diff <= \Concrete\Core\Validation\CSRF\Token::VALID_HASH_TIME_THRESHOLD;
+                    return $diff <= Token::VALID_HASH_TIME_THRESHOLD;
                 }
-                    $logger = $app->make('log/factory')->createLogger(Channels::CHANNEL_SECURITY);
-                    $u = User::getByUserID($userID);
-                    $logger->debug(t('Validation token did not match'), [
-                        'uID' => $u->getUserID(),
-                        'action' => $action,
-                        'time' => $time,
-                    ]);
+                $logger = $app->make('log/factory')->createLogger(Channels::CHANNEL_SECURITY);
+                $logger->debug(t('Validation token did not match'), [
+                    'uID' => $uID,
+                    'action' => $action,
+                    'time' => $time,
+                ]);
             }
         }
 
