@@ -1,7 +1,9 @@
 # Changelog
+
 ## [1.0.1] - 2022-10-17
 
 - Fix php8 compatible issue due to core bug
+- Fix mobile click issue due to user session
 
 ## [1.0.0] - 2022-10-04
 
