@@ -48,10 +48,14 @@ trait RatingTrait
     public function generate($action = '', $time = null, $uID = 0): string
     {
         $app = Application::getFacadeApplication();
-        if (!$uID) {
-            $u = $app->make(User::class);
-            $uID = (int) $u->getUserID();
+        $u = $app->make(User::class);
+        $user = $u->getByUserID($uID);
+        if ($user) {
+            $uID = $user->getUserID();
+        } else {
+            $uID = 0;
         }
+
         if (!$time) {
             $time = time();
         }
