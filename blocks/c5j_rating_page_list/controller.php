@@ -378,4 +378,14 @@ class Controller extends \Concrete\Block\PageList\Controller
 
         return RequestBase::post($field, $defaultValue);
     }
+
+    public function save($args): void
+    {
+        $args['filterByUserRated'] = 0;
+        if ($this->post('filterByUserRated')) {
+            $args['filterByUserRated'] = $this->post('filterByUserRated') ? 1 : 0;
+        }
+
+        parent::save($args);
+    }
 }
