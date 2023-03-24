@@ -1,4 +1,12 @@
 # Changelog
+
+## [1.0.1] - 2023-03-24
+
+- Fix php8 compatible issue due to core bug
+- Fix mobile click issue due to user session
+- Fix pagination view issue
+- Fix block edit issue
+
 ## [1.0.0] - 2022-10-04
 
 - Initial release to the Marketplace
