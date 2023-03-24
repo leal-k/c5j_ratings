@@ -95,7 +95,7 @@ $rated_date = $rated_date ?? null;
         <div class="ccm-search-results-pagination">
             <?php
             if (isset($pagination) && is_object($pagination)) {
-                echo $pagination->renderDefaultView();
+                echo $pagination->renderView('dashboard');
             } ?>
         </div>
         <?php
