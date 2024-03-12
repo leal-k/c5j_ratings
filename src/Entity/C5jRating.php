@@ -71,7 +71,7 @@ class C5jRating
         $this->ratedAt = $data['ratedAt'] ?? Carbon::now();
     }
 
-    public static function getByBIDAndUID(int $bID, int $uID): ?object
+    public static function getByBIDAndUID(int $bID, int $uID)
     {
         $em = \Concrete\Core\Support\Facade\DatabaseORM::entityManager();
 
@@ -79,7 +79,7 @@ class C5jRating
             ->findOneBy(['bID' => $bID, 'uID' => $uID]);
     }
 
-    public static function getByCIDAndUID(int $cID, int $uID): ?object
+    public static function getByCIDAndUID(int $cID, int $uID)
     {
         $em = \Concrete\Core\Support\Facade\DatabaseORM::entityManager();
 
