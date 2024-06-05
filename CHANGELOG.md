@@ -1,7 +1,7 @@
 # Changelog
-## [1.0.2-rc1] - 2024-03-112
+## [1.0.2-rc2] - 2024-06-05
 ### Fixed
-- PHP 7.1 compatibility issue
+- PHP 7.1 & 8.2 compatibility issue
 
 ## [1.0.1] - 2023-03-24
 
