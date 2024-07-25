@@ -2,13 +2,13 @@ function getRatings(getUrl, params) {
     updateRatings(getUrl, params);
 }
 
-function updateRatings(url, params, multi = false) {
+function updateRatings(url, params) {
     $.ajax({
         url: url,
         type: 'post',
         data: params,
         success: function(data) {
-            if (multi) {
+            if (Array.isArray(params['cID'])) {
                 data.forEach(function (item) {
                     updateRatingButtons(item);
                 });

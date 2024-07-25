@@ -231,13 +231,13 @@ if (is_object($c) && $c->isEditMode() && $controller->isBlockEmpty()) {
                 cIDs.push(this.value);
             });
             if (cIDs.length > 0) {
-                const url = "<?= URL::to($view->action('get_rating_list')) ?>";
+                const url = "<?= URL::to($view->action('get_ratings')) ?>";
                 const params = {
                     token: "<?= $app->make('token')->generate('rating') ?>",
                     uID: getUserID(),
-                    cIDs: cIDs
+                    cID: cIDs
                 };
-                updateRatings(url, params, true);
+                updateRatings(url, params);
             }
         }
         setRate();

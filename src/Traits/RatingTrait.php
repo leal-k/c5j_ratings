@@ -37,28 +37,18 @@ trait RatingTrait
         $this->token = $this->app->make('helper/validation/token');
         $uID = (int) $this->post('uID');
         if ($this->validateToken('rating', $this->post('token'), $uID)) {
-            $cID = (int) $this->post('cID');
-
-            return JsonResponse::create($this->getRatings($cID, $uID));
-        }
-
-            return JsonResponse::create($this->token->getErrorMessage());
-    }
-
-    public function action_get_rating_list(int $bID)
-    {
-        $this->token = $this->app->make('helper/validation/token');
-        $uID = (int) $this->post('uID');
-        if ($this->validateToken('rating', $this->post('token'), $uID)) {
-            $cIDs = $this->post('cIDs');
             $ratings = [];
-            foreach ($cIDs as $cID) {
-                $ratings[] = $this->getRatings($cID, $uID);
+            $cID = $this->post('cID');
+            if (is_array($cID)) {
+                foreach ($cID as $id) {
+                    $ratings[] = $this->getRatings((int)$id, $uID);
+                }
+            } else {
+                $ratings = $this->getRatings((int)$cID, $uID);
             }
 
             return JsonResponse::create($ratings);
         }
-
         return JsonResponse::create($this->token->getErrorMessage());
     }
 
