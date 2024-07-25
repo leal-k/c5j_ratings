@@ -45,6 +45,23 @@ trait RatingTrait
             return JsonResponse::create($this->token->getErrorMessage());
     }
 
+    public function action_get_rating_list(int $bID)
+    {
+        $this->token = $this->app->make('helper/validation/token');
+        $uID = (int) $this->post('uID');
+        if ($this->validateToken('rating', $this->post('token'), $uID)) {
+            $cIDs = $this->post('cIDs');
+            $ratings = [];
+            foreach ($cIDs as $cID) {
+                $ratings[] = $this->getRatings($cID, $uID);
+            }
+
+            return JsonResponse::create($ratings);
+        }
+
+        return JsonResponse::create($this->token->getErrorMessage());
+    }
+
     public function generate($action = '', $time = null, $uID = 0): string
     {
         $app = Application::getFacadeApplication();

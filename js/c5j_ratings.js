@@ -2,12 +2,18 @@ function getRatings(getUrl, params) {
     updateRatings(getUrl, params);
 }
 
-function updateRatings(url, params) {
+function updateRatings(url, params, multi = false) {
     $.ajax({
         url: url,
         type: 'post',
         data: params,
         success: function(data) {
+            if (multi) {
+                data.forEach(function (item) {
+                    updateRatingButtons(item);
+                });
+                return;
+            }
             updateRatingButtons(data);
         }
     });

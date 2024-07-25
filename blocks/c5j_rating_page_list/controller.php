@@ -329,6 +329,9 @@ class Controller extends \Concrete\Block\PageList\Controller
             if (isset($parameters[1])) {
                 $parameters[1] = (int) ($parameters[1]);
             }
+        } elseif ($parameters[0] == 'get_rating_list') {
+            $method = 'action_get_rating_list';
+            $parameters = array_slice($parameters, 1);
         } else {
             $parameters = $method = null;
         }

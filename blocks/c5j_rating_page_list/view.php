@@ -225,16 +225,22 @@ if (is_object($c) && $c->isEditMode() && $controller->isBlockEmpty()) {
     } ?>
 <script>
     $(document).ready(function () {
-        let getUrl = "<?= URL::to($view->action('get_ratings')) ?>";
-        let params = {
-            token: "<?= $app->make('token')->generate('rating') ?>",
-            uID: getUserID(),
-        };
-
-        $('input[name^="pageIDs"]').each(function() {
-            params['cID'] = this.value;
-            getRatings(getUrl, params);
-        });
+        function setRate() {
+            const cIDs = [];
+            $('input[name^="pageIDs"]').each( function() {
+                cIDs.push(this.value);
+            });
+            if (cIDs.length > 0) {
+                const url = "<?= URL::to($view->action('get_rating_list')) ?>";
+                const params = {
+                    token: "<?= $app->make('token')->generate('rating') ?>",
+                    uID: getUserID(),
+                    cIDs: cIDs
+                };
+                updateRatings(url, params, true);
+            }
+        }
+        setRate();
     });
 
     function getUserID() {
