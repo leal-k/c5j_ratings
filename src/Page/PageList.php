@@ -18,6 +18,8 @@ class PageList extends \Concrete\Core\Page\PageList
         $this->query->addSelect('SUM(r.ratedValue) AS ratings');
         $this->query->addSelect('r.bID');
         $this->query->addGroupBy('p.cID');
+        $this->query->addGroupBy('r.bID');
+        $this->query->addGroupBy('p.cDisplayOrder');
     }
 
     public function filterByUserRated(int $uID): void
