@@ -9,7 +9,7 @@ use Doctrine\ORM\EntityManagerInterface;
 
 class UserEventListener
 {
-    public function onUserDelete(DeleteUser $event): void
+    public static function onUserDelete(DeleteUser $event): void
     {
         $ui = $event->getUserInfoObject();
         if ($ui) {

@@ -9,7 +9,7 @@ use Doctrine\ORM\EntityManagerInterface;
 
 class PageEventListener
 {
-    public function onPageDelete(DeletePageEvent $event): void
+    public static function onPageDelete(DeletePageEvent $event): void
     {
         $page = $event->getPageObject();
         if ($page) {

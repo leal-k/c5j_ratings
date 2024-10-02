@@ -1,4 +1,7 @@
 # Changelog
+## [1.0.2] - 2024-10-02
+### Fixed
+- PHP 7.1 & 8.2 compatibility issue
 
 ## [1.1.0-rc1] - 2024-02-16
 ### Fixed
@@ -19,7 +22,6 @@
 ### Fixed
 - View design compatibility with v8 and v9
 
-# Changelog
 ## [0.1.5] - 2022-08-01
 ### Fixed
 - Preview design compatibility with v8 and v9
