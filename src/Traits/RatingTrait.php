@@ -60,10 +60,7 @@ trait RatingTrait
             $time = time();
         }
         $config = $app->make('config/database');
-        $actionArray = array_map('strval', $action); //makes sure that $action is a string
-        $actionString = implode(':', $actionArray); //properly dealing with the array to string
-        $actionString = str_replace(' ', '_', $actionString); //treating all spaces in the string
-        return $time . ':' . md5($time . ':' . $uID . ':' . $actionString . ':' . $config->get('concrete.security.token.validation'));
+        return $time . ':' . md5($time . ':' . $uID . ':' . $action . ':' . $config->get('concrete.security.token.validation'));
     }
 
     public function validate($action = '', $token = null, $uID = 0): bool
