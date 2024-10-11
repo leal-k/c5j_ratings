@@ -8,6 +8,12 @@ function updateRatings(url, params) {
         type: 'post',
         data: params,
         success: function(data) {
+            if (Array.isArray(params['cID'])) {
+                data.forEach(function (item) {
+                    updateRatingButtons(item);
+                });
+                return;
+            }
             updateRatingButtons(data);
         }
     });

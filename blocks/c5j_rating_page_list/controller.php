@@ -143,6 +143,7 @@ class Controller extends \Concrete\Block\PageList\Controller
         $this->list = new PageList();
         $this->list->disableAutomaticSorting();
         $this->list->setNameSpace('b' . $this->bID);
+        $expr = $this->list->getQueryObject()->expr(); // Get Query Expression Object
 
         $cArray = [];
 
@@ -238,9 +239,16 @@ class Controller extends \Concrete\Block\PageList\Controller
         if ($this->displayAliases) {
             $this->list->includeAliases();
         }
+        if ($this->displaySystemPages) {
+            $this->list->includeSystemPages();
+        }
         if (isset($this->ignorePermissions) && $this->ignorePermissions) {
             $this->list->ignorePermissions();
         }
+        if ($this->excludeCurrentPage) {
+	    $ID = Page::getCurrentPage()->getCollectionID();
+	    $this->list->getQueryObject()->andWhere($expr->neq('p.cID', $ID));
+	}
 
         $this->list->filter('cvName', '', '!=');
 

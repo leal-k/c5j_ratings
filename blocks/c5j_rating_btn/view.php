@@ -7,6 +7,12 @@
 use Concrete\Core\Support\Facade\Facade;
 use Concrete\Core\Support\Facade\Url;
 use Concrete\Core\Page\Page;
+
+/** @var \Concrete\Core\View\View $view */
+
+$bID = $bID ?? 0;
+$displayRatings = $displayRatings ?? false;
+
 $app = Facade::getFacadeApplication();
 $btnType = $btnType ?? 'clap';
 $cID = Page::getCurrentPage()->getCollectionID();

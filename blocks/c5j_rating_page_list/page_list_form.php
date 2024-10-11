@@ -1,10 +1,13 @@
 <?php
 defined('C5_EXECUTE') or die('Access Denied.');
+
 use Concrete\Package\C5jRatings\Block\C5jRatingPageList\Controller;
+use Concrete\Core\Application\Service\Urls;
 use Concrete\Core\Application\Service\UserInterface;
 use Concrete\Core\Attribute\Key\CollectionKey;
 use Concrete\Core\Block\BlockType\BlockType;
 use Concrete\Core\Entity\Attribute\Category;
+use Concrete\Core\Entity\Attribute\Key\Key;
 use Concrete\Core\Form\Service\Form;
 use Concrete\Core\Form\Service\Widget\PageSelector;
 use Concrete\Core\Entity\Page\Feed;
@@ -33,6 +36,7 @@ use Concrete\Core\Form\Service\Widget\DateTime;
     $miniNumOfRatings = $miniNumOfRatings ?? 0;
 /** @var int $numOfRatings */
     $numOfRatings = $numOfRatings ?? 0;
+/** @var string $topicFilter */
 /** @var string $filterDateOption */
 /** @var int $filterDateDays */
 /** @var string $filterDateStart */
@@ -45,15 +49,21 @@ use Concrete\Core\Form\Service\Widget\DateTime;
 /** @var bool $includeDescription */
 /** @var bool $includeAllDescendents */
 /** @var bool $paginate */
+/** @var bool $displaySystemPages */
+$displaySystemPages = $displaySystemPages ?? false;
+/** @var bool $excludeCurrentPages */
+$excludeCurrentPage = $excludeCurrentPage ?? false;
 /** @var bool $displayAliases */
 /** @var bool $ignorePermissions */
 /** @var bool $enableExternalFiltering */
 /** @var int $ptID */
+/** @var int $pfID */
 /** @var int $truncateSummaries */
 /** @var bool $displayFeaturedOnly */
 /** @var string $noResultsMessage */
 /** @var bool $displayThumbnail */
 /** @var int $truncateChars */
+/** @var Urls $uh */
 /** @var BlockType $bt */
 /** @var CollectionKey $featuredAttribute */
 /** @var Category[] $attributeKeys */
@@ -62,6 +72,8 @@ use Concrete\Core\Form\Service\Widget\DateTime;
 /** @var Feed $rssFeed */
 /** @var string $btnType */
 $btnType = $btnType ?? 'Heart';
+$cmsVersion = app('config')->get('concrete.version');
+$isV9 = version_compare($cmsVersion, '9.0.0', '>=');
 
 if (!isset($filterDateDays)) {
     $filterDateDays = false;
@@ -105,6 +117,8 @@ $app = Application::getFacadeApplication();
 $pageSelector = $app->make(PageSelector::class);
 /** @var UserInterface $userInterface */
 $userInterface = $app->make(UserInterface::class);
+/** @var Urls $urlService */
+$urlService = $app->make(Urls::class);
 /** @var Form $form */
 $form = $app->make(Form::class);
 /** @var DateTime $dateTime */
@@ -119,23 +133,24 @@ echo $userInterface->tabs([
 <div class="ccm-tab-content tab-content" id="ccm-tab-content-page-list-settings">
     <div class="tab-pane active pagelist-form" id="page-list-settings" role="tabpanel">
         <input type="hidden" name="pageListPreviewPane" value="<?= h($controller->getActionURL('preview_pane')) ?>"/>
+
         <fieldset>
             <div class="form-group">
                 <?php echo $form->label('num', t('Number of Pages to Display')); ?>
-                <?php echo $form->number("num", $num); ?>
+                <?php echo $form->number("num", $num, ['min' => 0]); ?>
             </div>
 
             <div class="form-group">
                 <?php
-                    $pageTypes = ['0' => t('** All')];
-                    /** @noinspection PhpUndefinedClassInspection */
-                    foreach (PageType::getList(false, $siteType) as $pageType) {
-                        /** @var Type $pageType */
-                        $pageTypes[$pageType->getPageTypeID()] = $pageType->getPageTypeDisplayName();
-                    }
+                $pageTypes = ['0' => t('** All')];
+                /** @noinspection PhpUndefinedClassInspection */
+                foreach (PageType::getList(false, $siteType) as $pageType) {
+                    /** @var Type $pageType */
+                    $pageTypes[$pageType->getPageTypeID()] = $pageType->getPageTypeDisplayName();
+                }
 
-                    echo $form->label('ptID', t('Page Type'));
-                    echo $form->select("ptID", $pageTypes, $ptID);
+                echo $form->label('ptID', t('Page Type'));
+                echo $form->select("ptID", $pageTypes, $ptID);
                 ?>
             </div>
         </fieldset>
@@ -143,14 +158,17 @@ echo $userInterface->tabs([
         <fieldset>
             <div class="form-group">
                 <?php echo $form->label('', t('Topics')); ?>
+
                 <div class="form-check">
                     <?php echo $form->radio("topicFilter", "", $topicFilter, ["id" => "topicFilter", "name" => "topicFilter"]); ?>
                     <?php echo $form->label("topicFilter", t("No topic filtering"), ["class" => "form-check-label"]); ?>
                 </div>
+
                 <div class="form-check">
                     <?php echo $form->radio("topicFilter", "custom", $topicFilter, ["id" => "topicFilterCustom", "name" => "topicFilter"]); ?>
                     <?php echo $form->label("topicFilterCustom", t("Custom Topic"), ["class" => "form-check-label"]); ?>
                 </div>
+
                 <div class="form-check">
                     <?php echo $form->radio("topicFilter", "related", $topicFilter, ["id" => "topicFilterRelated", "name" => "topicFilter"]); ?>
                     <?php echo $form->label("topicFilterRelated", t("Related Topic"), ["class" => "form-check-label"]); ?>
@@ -181,25 +199,26 @@ echo $userInterface->tabs([
                         <?=t('Allows other blocks like the topic list block to pass search criteria to this page list block.')?>
                     </span>
                     <?php
-                        $relatedTopicAttributeKeyHandles = [
-                                "" => t('Choose topics attribute.')
-                        ];
+                    $relatedTopicAttributeKeyHandles = [
+                        "" => t('Choose topics attribute.')
+                    ];
 
-                        foreach ($attributeKeys as $attributeKey) {
-                            $relatedTopicAttributeKeyHandles[$attributeKey->getAttributeKeyHandle()] = $attributeKey->getAttributeKeyDisplayName();
-                        }
+                    foreach ($attributeKeys as $attributeKey) {
+                        $relatedTopicAttributeKeyHandles[$attributeKey->getAttributeKeyHandle()] = $attributeKey->getAttributeKeyDisplayName();
+                    }
 
-                        echo $form->select("relatedTopicAttributeKeyHandle", $relatedTopicAttributeKeyHandles, $relatedTopicAttributeKeyHandle);
+                    echo $form->select("relatedTopicAttributeKeyHandle", $relatedTopicAttributeKeyHandles, $relatedTopicAttributeKeyHandle);
                     ?>
-                    
                 </div>
             </div>
-
         </fieldset>
 
         <fieldset>
             <div class="form-group">
-                <label class="control-label"><?= t('Filter by Public Date') ?></label>
+                <label class="control-label form-label">
+                    <?php echo t('Filter by Public Date') ?>
+                </label>
+
                 <?php
                 $filterDateOptions = [
                     'all' => t('Show All'),
@@ -209,37 +228,49 @@ echo $userInterface->tabs([
                     'between' => t('Between'),
                 ];
                 $i = 0;
+                ?>
 
-                foreach ($filterDateOptions as $filterDateOptionHandle => $filterDateOptionLabel) {
-                    $isChecked = ($filterDateOption == $filterDateOptionHandle) ? 'checked' : ''; ?>
+                <?php foreach ($filterDateOptions as $filterDateOptionHandle => $filterDateOptionLabel) { ?>
+
                     <div class="form-check">
                         <?php $id = "filterDateOption" . $i++; ?>
                         <?php echo $form->radio("filterDateOption", $filterDateOptionHandle, $filterDateOption, ["id" => $id, "name" => "filterDateOption", "class" => "form-check-input filterDateOption"]); ?>
                         <?php echo $form->label($id, $filterDateOptionLabel, ["class" => "form-check-label"]); ?>
                     </div>
-                    <?php
-                } ?>
+                <?php } ?>
 
                 <div class="filterDateOptionDetail" data-filterDateOption="past">
                     <div class="form-group">
-                        <label class="control-label"><?=t('Days in the Past')?> <i class="launch-tooltip fa fa-question-circle" title="<?=t('Leave 0 to show all past dated pages')?>"></i></label>
+                        <label class="control-label form-label">
+                            <?php echo t('Days in the Past') ?>
+                            <i class="launch-tooltip fas fa-question-circle"
+                               title="<?php echo t('Leave 0 to show all past dated pages') ?>"></i>
+                        </label>
+
                         <?php echo $form->text("filterDatePast", $filterDateDays ? $filterDateDays : 0); ?>
                     </div>
                 </div>
 
                 <div class="filterDateOptionDetail" data-filterDateOption="future">
                     <div class="form-group">
-                        <label class="control-label"><?=t('Days in the Future')?> <i class="launch-tooltip fa fa-question-circle" title="<?=t('Leave 0 to show all future dated pages')?>"></i></label>
+                        <label class="control-label form-label">
+                            <?php echo t('Days in the Future') ?>
+                            <i class="launch-tooltip fas fa-question-circle"
+                               title="<?php echo t('Leave 0 to show all future dated pages') ?>"></i>
+                        </label>
+
                         <?php echo $form->text("filterDateFuture", $filterDateDays ? $filterDateDays : 0); ?>
                     </div>
                 </div>
 
                 <div class="filterDateOptionDetail" data-filterDateOption="between">
-                    <?php
-                    echo $dateTime->date('filterDateStart', $filterDateStart);
-                    echo '<p>' . t('and') . '</p>';
-                    echo $dateTime->date('filterDateEnd', $filterDateEnd);
-                    ?>
+                    <?php echo $dateTime->date('filterDateStart', $filterDateStart); ?>
+
+                    <p>
+                        <?php echo t('and'); ?>
+                    </p>
+
+                    <?php echo $dateTime->date('filterDateEnd', $filterDateEnd); ?>
                 </div>
 
             </div>
@@ -256,9 +287,7 @@ echo $userInterface->tabs([
                 </div>
                 
                 <?php
-                    $config = $app->make('config');
-                    $codeVersion = $config->get('concrete.version');
-                    if (version_compare($codeVersion, '9.0.0', '<')) {
+                if ($isV9) {
                         ?>
                         <div class="ccm-page-list-number-ratings">
                             <div class="input-group">
@@ -332,24 +361,39 @@ echo $userInterface->tabs([
                     <?php if (!is_object($featuredAttribute)) { ?>
                         <div class="help-block">
                             <?php echo t(
-                                    '(<strong>Note</strong>: You must create the "is_featured" page attribute first.)');
+                                '(<strong>Note</strong>: You must create the "is_featured" page attribute first.)');
                             ?>
                         </div>
                     <?php } ?>
                 </div>
+
                 <div class="form-check">
                     <?php echo $form->checkbox("displayAliases", "1", $displayAliases); ?>
                     <?php echo $form->label("displayAliases", t("Display page aliases."), ["class" => "form-check-label"]); ?>
                 </div>
+
+                <div class="form-check">
+                    <?php echo $form->checkbox("displaySystemPages", "1", $displaySystemPages); ?>
+                    <?php echo $form->label("displaySystemPages", t("Display system pages."), ["class" => "form-check-label"]); ?>
+                </div>
+
                 <div class="form-check">
                     <?php echo $form->checkbox("ignorePermissions", "1", $ignorePermissions); ?>
                     <?php echo $form->label("ignorePermissions", t("Ignore page permissions."), ["class" => "form-check-label"]); ?>
                 </div>
+
                 <div class="form-check">
                     <?php echo $form->checkbox("enableExternalFiltering", "1", $enableExternalFiltering); ?>
                     <?php echo $form->label("enableExternalFiltering", t("Enable Other Blocks to Filter This Page List."), ["class" => "form-check-label"]); ?>
+                    <i class="launch-tooltip fa fa-question-circle" title="<?php echo t('Allow other blocks, like the topic list block, to pass search criteria to this page list block.') ?>"></i>
                 </div>
 
+		<div class="form-check">
+                    <?php echo $form->checkbox("excludeCurrentPage", "1", $excludeCurrentPage); ?>
+                    <?php echo $form->label("excludeCurrentPage", t("Exclude Current Page"), ["class" => "form-check-label"]); ?>
+		    <i class="launch-tooltip fa fa-question-circle" title="<?php echo t('If the currently rendered page is in the list, exclude it.') ?>"></i>
+                </div>
+            </div>
         </fieldset>
 
         <fieldset>
@@ -362,6 +406,7 @@ echo $userInterface->tabs([
                 </div>
             </div>
         </fieldset>
+
         <fieldset>
             <div class="form-group">
                 <?php echo $form->label('', t('Location')); ?>
@@ -403,233 +448,222 @@ echo $userInterface->tabs([
                 </div>
             </div>
         </fieldset>
+
         <fieldset>
             <div class="form-group">
                 <?php
-                    echo $form->label("orderBy", t('Sort'));
-                    echo $form->select("orderBy", [
-                            "display_asc" => t('Sitemap order'),
-                            "display_desc" => t('Reverse sitemap order'),
-                            "chrono_desc" => t('Most recent first'),
-                            "chrono_asc" => t('Earliest first'),
-                            "alpha_asc" => t('Alphabetical order'),
-                            "alpha_desc" => t('Reverse alphabetical order'),
-                            "modified_desc" => t('Most recently modified first'),
-                            "rated_desc" => t('Most rated first'),
-                            "recently_rated_desc" => t('Most recently rated first'),
-                            "random" => t('Random')
-                    ], $orderBy);
+                echo $form->label("orderBy", t('Sort'));
+                echo $form->select("orderBy", [
+                    "display_asc" => t('Sitemap order'),
+                    "display_desc" => t('Reverse sitemap order'),
+                    "chrono_desc" => t('Most recent first'),
+                    "chrono_asc" => t('Earliest first'),
+                    "alpha_asc" => t('Alphabetical order'),
+                    "alpha_desc" => t('Reverse alphabetical order'),
+                    "modified_desc" => t('Most recently modified first'),
+                    "rated_desc" => t('Most rated first'),
+                    "recently_rated_desc" => t('Most recently rated first'),
+                    "random" => t('Random')
+                ], $orderBy);
                 ?>
             </div>
         </fieldset>
 
+        <fieldset>
+            <legend>
+                <?php echo t('Output') ?>
+            </legend>
 
-    <fieldset>
-        <legend>
-            <?php echo t('Output') ?>
-        </legend>
+            <div class="form-group">
+                <?php
+                    echo $form->label("btnType", t('Button Type'));
+                    echo $form->select("btnType", [
+                            "clap" => t('Clap'),
+                            "heart" => t('Heart'),
+                            "like" => t('Like')
+                    ], $btnType);
+                ?>
+            </div>
+            <div class="form-group">
+                <label class="control-label form-label"><?=t('Display the total rating?')?></label>
+                <div class="radio">
+                    <label>
+                        <input type="radio" id="displayRatings1" name="displayRatings" value="1" class="ccm-input-radio" checked="checked">
+                        <?=t('Yes')?>
+                    </label>
+                </div>
+                <div class="radio">
+                    <label>
+                        <input type="radio" id="displayRatings2" name="displayRatings" value="0" class="ccm-input-radio">
+                        <?=t('No')?>
+                    </label>
+                </div>
+            </div>
 
-        <div class="form-group">
-            <?php
-                echo $form->label("btnType", t('Button Type'));
-                echo $form->select("btnType", [
-                        "clap" => t('Clap'),
-                        "heart" => t('Heart'),
-                        "like" => t('Like')
-                ], $btnType);
-            ?>
-        </div>
-        <div class="form-group">
-            <label class="control-label form-label"><?=t('Display the total rating?')?></label>
-            <div class="radio">
-                <label>
-                    <input type="radio" id="displayRatings1" name="displayRatings" value="1" class="ccm-input-radio" checked="checked">
-                    <?=t('Yes')?>
+            <div class="form-group">
+                <label class="control-label form-label">
+                    <?php echo t('Provide RSS Feed') ?>
                 </label>
-            </div>
-            <div class="radio">
-                <label>
-                    <input type="radio" id="displayRatings2" name="displayRatings" value="0" class="ccm-input-radio">
-                    <?=t('No')?>
-                </label>
-            </div>
-        </div>
 
-        <div class="form-group">
-            <label class="control-label form-label">
-                <?php echo t('Provide RSS Feed') ?>
-            </label>
+                <div class="form-check">
+                    <?php echo $form->radio("rss", "0", is_object($rssFeed) ? '1' : '0', ["id" => "disableRssFeed", "name" => "rss", "class" => "form-check-input rssSelector"]); ?>
+                    <?php echo $form->label("disableRssFeed", t("No"), ["class" => "form-check-label"]); ?>
+                </div>
 
-            <div class="form-check">
-                <?php echo $form->radio("rss", "0", is_object($rssFeed) ? '1' : '0', ["id" => "disableRssFeed", "name" => "rss", "class" => "form-check-input rssSelector"]); ?>
-                <?php echo $form->label("disableRssFeed", t("No"), ["class" => "form-check-label"]); ?>
-            </div>
+                <div class="form-check">
+                    <?php echo $form->radio("rss", "1", is_object($rssFeed) ? '1' : '0', ["id" => "enableRssFeed", "name" => "rss", "class" => "form-check-input rssSelector"]); ?>
+                    <?php echo $form->label("enableRssFeed", t("Yes"), ["class" => "form-check-label"]); ?>
+                </div>
 
-            <div class="form-check">
-                <?php echo $form->radio("rss", "1", is_object($rssFeed) ? '1' : '0', ["id" => "enableRssFeed", "name" => "rss", "class" => "form-check-input rssSelector"]); ?>
-                <?php echo $form->label("enableRssFeed", t("Yes"), ["class" => "form-check-label"]); ?>
-            </div>
-
-            <div id="ccm-pagelist-rssDetails" <?php echo(is_object($rssFeed) ? '' : 'style="display:none;"') ?>>
-                <?php if (is_object($rssFeed)) { ?>
-                    <?php echo t('RSS Feed can be found here: %s', '<a href="' . h($rssFeed->getFeedURL()) . '" target="_blank">' . $rssFeed->getFeedURL() . '</a>') ?>
-                <?php } else { ?>
-                    <div class="form-group">
-                        <?php echo $form->label('num', t('RSS Feed Title')); ?>
-                        <?php echo $form->text("rssTitle", $num, ["id" => "ccm-pagelist-rssTitle", "name" => "rssTitle"]); ?>
-                    </div>
-
-                    <div class="form-group">
-                        <?php echo $form->label("rssDescription", ('RSS Feed Description')); ?>
-                        <?php echo $form->textarea("rssDescription"); ?>
-                    </div>
-
-                    <div class="form-group">
-                        <?php echo $form->label('', t('RSS Feed Location')); ?>
-
-                        <div class="input-group">
-                            <span class="input-group-text">
-                                <?php echo (string)Url::to('/rss') ?>/
-                            </span>
-
-                            <?php echo $form->text("rssHandle"); ?>
+                <div id="ccm-pagelist-rssDetails" <?php echo(is_object($rssFeed) ? '' : 'style="display:none;"') ?>>
+                    <?php if (is_object($rssFeed)) { ?>
+                        <?php echo t('RSS Feed can be found here: %s', '<a href="' . h($rssFeed->getFeedURL()) . '" target="_blank">' . $rssFeed->getFeedURL() . '</a>') ?>
+                    <?php } else { ?>
+                        <div class="form-group">
+                            <?php echo $form->label('num', t('RSS Feed Title')); ?>
+                            <?php echo $form->text("rssTitle", $num, ["id" => "ccm-pagelist-rssTitle", "name" => "rssTitle"]); ?>
                         </div>
-                    </div>
-                <?php } ?>
-            </div>
-        </div>
 
-        <div class="form-group">
-            <label class="control-label form-label">
-                <?php echo t('Include Page Name') ?>
-            </label>
+                        <div class="form-group">
+                            <?php echo $form->label("rssDescription", ('RSS Feed Description')); ?>
+                            <?php echo $form->textarea("rssDescription"); ?>
+                        </div>
 
-            <div class="form-check">
-                <?php echo $form->radio("includeName", "0", $includeName ? '1' : '0', ["id" => "disableIncludeName", "name" => "includeName"]); ?>
-                <?php echo $form->label("disableIncludeName", t("No"), ["class" => "form-check-label"]); ?>
-            </div>
+                        <div class="form-group">
+                            <?php echo $form->label('', t('RSS Feed Location')); ?>
 
-            <div class="form-check">
-                <?php echo $form->radio("includeName", "1", $includeName ? '1' : '0', ["id" => "enableIncludeName", "name" => "includeName"]); ?>
-                <?php echo $form->label("enableIncludeName", t("Yes"), ["class" => "form-check-label"]); ?>
-            </div>
-        </div>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <?php echo (string)Url::to('/rss') ?>/
+                                </span>
 
-        <div class="form-group">
-            <label class="control-label form-label">
-                <?php echo t('Include Page Description') ?>
-            </label>
-
-            <div class="form-check">
-                <?php echo $form->radio("includeDescription", "0", $includeDescription ? '1' : '0', ["id" => "disableIncludeDescription", "name" => "includeDescription"]); ?>
-                <?php echo $form->label("disableIncludeDescription", t("No"), ["class" => "form-check-label"]); ?>
+                                <?php echo $form->text("rssHandle"); ?>
+                            </div>
+                        </div>
+                    <?php } ?>
+                </div>
             </div>
 
-            <div class="form-check">
-                <?php echo $form->radio("includeDescription", "1", $includeDescription ? '1' : '0', ["id" => "enableIncludeDescription", "name" => "includeDescription"]); ?>
-                <?php echo $form->label("enableIncludeDescription", t("Yes"), ["class" => "form-check-label"]); ?>
+            <div class="form-group">
+                <label class="control-label form-label">
+                    <?php echo t('Include Page Name') ?>
+                </label>
+
+                <div class="form-check">
+                    <?php echo $form->radio("disableIncludeName", "0", $includeName ? '1' : '0', ["id" => "disableIncludeName", "name" => "includeName"]); ?>
+                    <?php echo $form->label("disableIncludeName", t("No"), ["class" => "form-check-label"]); ?>
+                </div>
+
+                <div class="form-check">
+                    <?php echo $form->radio("enableIncludeName", "1", $includeName ? '1' : '0', ["id" => "enableIncludeName", "name" => "includeName"]); ?>
+                    <?php echo $form->label("enableIncludeName", t("Yes"), ["class" => "form-check-label"]); ?>
+                </div>
             </div>
 
-            <div class="ccm-page-list-truncate-description" <?= ($includeDescription ? '' : 'style="display:none;"') ?>>
-                <label class="control-label form-label"><?=t('Display Truncated Description')?></label>
-                <div class="input-group">
-	
-				<?php
-					$config = $app->make('config');
-					$codeVersion = $config->get('concrete.version');
-					if (version_compare($codeVersion, '9.0.0', '<')) {
-						?>
-                        <span class="input-group-addon">
-                            <input id="ccm-pagelist-truncateSummariesOn" name="truncateSummaries" type="checkbox"
-                                   value="1" <?= ($truncateSummaries ? 'checked="checked"' : '') ?> />
-                        </span>
-                        <input class="form-control" id="ccm-pagelist-truncateChars" <?= ($truncateSummaries ? '' : 'disabled="disabled"') ?>
-                               type="text" name="truncateChars" size="3" value="<?= (int) $truncateChars ?>" />
-                        <span class="input-group-addon">
-                            <?= t('characters') ?>
-                        </span>
-						<?php
-					} else {
-						?>
-                        <span class="input-group-text">
+            <div class="form-group">
+                <label class="control-label form-label">
+                    <?php echo t('Include Page Description') ?>
+                </label>
+
+                <div class="form-check">
+                    <?php echo $form->radio("includeDescription", "0", $includeDescription ? '1' : '0', ["id" => "disableIncludeDescription", "name" => "includeDescription"]); ?>
+                    <?php echo $form->label("disableIncludeDescription", t("No"), ["class" => "form-check-label"]); ?>
+                </div>
+
+                <div class="form-check">
+                    <?php echo $form->radio("includeDescription", "1", $includeDescription ? '1' : '0', ["id" => "enableIncludeDescription", "name" => "includeDescription"]); ?>
+                    <?php echo $form->label("enableIncludeDescription", t("Yes"), ["class" => "form-check-label"]); ?>
+                </div>
+
+                <div class="ccm-page-list-truncate-description" <?php echo($includeDescription ? '' : 'style="display:none;"') ?>>
+                    <label class="control-label form-label">
+                        <?php echo t('Display Truncated Description') ?>
+                    </label>
+
+                    <div class="input-group">
+                        <span class="<?= $isV9 ? 'input-group-text' : 'input-group-addon' ?>">
+                            <!--suppress HtmlFormInputWithoutLabel -->
                             <input id="ccm-pagelist-truncateSummariesOn" name="truncateSummaries" type="checkbox"
                                    value="1" <?php echo($truncateSummaries ? 'checked="checked"' : '') ?> />
                         </span>
-							
-							<?php
-								$miscFields = ["id" => "ccm-pagelist-truncateChars", "name" => "truncateChars", "step" => 1, "min" => 0];
-								
-								if (!$truncateSummaries) {
-									$miscFields["disabled"] = "disabled";
-								}
-								
-								echo $form->number("truncateChars", (int)$truncateChars, $miscFields);
-							?>
 
-                            <span class="input-group-text">
+                    <?php
+                        if ($isV9) {
+                            $miscFields = ["id" => "ccm-pagelist-truncateChars", "name" => "truncateChars", "step" => 1, "min" => 0];
+                            if (!$truncateSummaries) {
+                                $miscFields["disabled"] = "disabled";
+                            }
+                            echo $form->number("truncateChars", (int)$truncateChars, $miscFields);
+                        } else {
+                            ?>
+                            <input class="form-control" id="ccm-pagelist-truncateChars" <?= ($truncateSummaries ? '' : 'disabled="disabled"') ?>
+                                   type="text" name="truncateChars" size="3" value="<?= (int) $truncateChars ?>" />
+                            <?php
+                        }
+                    ?>
+
+                        <span class="<?= $isV9 ? 'input-group-text' : 'input-group-addon' ?>">
                             <?php echo t('characters') ?>
                         </span>
-						<?php
-					}
-				?>
+                    </div>
                 </div>
             </div>
-    
+
             <div class="form-group">
                 <?php echo $form->label('', t('Include Public Page Date')); ?>
-    
+
                 <div class="form-check">
                     <?php echo $form->radio("includeDate", "0", $includeDate ? '1' : '0', ["id" => "disableIncludeDate", "name" => "includeDate"]); ?>
                     <?php echo $form->label("disableIncludeDate", t("No"), ["class" => "form-check-label"]); ?>
                 </div>
-    
+
                 <div class="form-check">
                     <?php echo $form->radio("includeDate", "1", $includeDate ? '1' : '0', ["id" => "enableIncludeDate", "name" => "includeDate"]); ?>
                     <?php echo $form->label("enableIncludeDate", t("Yes"), ["class" => "form-check-label"]); ?>
                 </div>
-    
+
                 <div class="help-block">
                     <?php echo t('This is usually the date the page is created. It can be changed from the page attributes panel.') ?>
                 </div>
             </div>
-    
+
             <div class="form-group">
                 <label class="control-label form-label">
                     <?php echo t('Display Thumbnail Image') ?>
                 </label>
-    
+
                 <div class="form-check">
                     <?php echo $form->radio("displayThumbnail", "0", $displayThumbnail ? '1' : '0', ["id" => "disableIncludeThumbnail", "name" => "displayThumbnail"]); ?>
                     <?php echo $form->label("disableIncludeThumbnail", t("No"), ["class" => "form-check-label"]); ?>
                 </div>
-    
+
                 <div class="form-check">
                     <?php echo $form->radio("displayThumbnail", "1", $displayThumbnail ? '1' : '0', ["id" => "enableIncludeThumbnail", "name" => "displayThumbnail"]); ?>
                     <?php echo $form->label("enableIncludeThumbnail", t("Yes"), ["class" => "form-check-label"]); ?>
                 </div>
-    
+
                 <?php if (!is_object($thumbnailAttribute)) { ?>
                     <div class="help-block">
                         <?php echo t('You must create an attribute with the \'thumbnail\' handle in order to use this option.') ?>
                     </div>
                 <?php } ?>
             </div>
-    
+
             <div class="form-group">
                 <label class="control-label form-label">
                     <?php echo t('Use Different Link than Page Name') ?>
                 </label>
-    
+
                 <div class="form-check">
                     <?php echo $form->radio("useButtonForLink", "0", $useButtonForLink ? '1' : '0', ["id" => "disableUseButtonForLink", "name" => "useButtonForLink"]); ?>
                     <?php echo $form->label("disableUseButtonForLink", t("No"), ["class" => "form-check-label"]); ?>
                 </div>
-    
+
                 <div class="form-check">
                     <?php echo $form->radio("useButtonForLink", "1", $useButtonForLink ? '1' : '0', ["id" => "enableUseButtonForLink", "name" => "useButtonForLink"]); ?>
                     <?php echo $form->label("enableUseButtonForLink", t("Yes"), ["class" => "form-check-label"]); ?>
                 </div>
-    
+
                 <div class="ccm-page-list-button-text" <?php echo($useButtonForLink ? '' : 'style="display:none;"') ?>>
                     <div class="form-group">
                         <?php echo $form->label('buttonLinkText', t('Link Text')); ?>
@@ -637,38 +671,33 @@ echo $userInterface->tabs([
                     </div>
                 </div>
             </div>
-    
+
             <div class="form-group">
                 <?php echo $form->label('pageListTitle', t('Title of Page List')); ?>
-                
-                    <?php
-                        $config = $app->make('config');
-                        $codeVersion = $config->get('concrete.version');
-                        if (version_compare($codeVersion, '9.0.0', '>')) {
-                            ?>
-                            <div class="input-group">
-                                <?php echo $form->text("pageListTitle", $pageListTitle); ?>
-                                <?php echo $form->select('titleFormat', \Concrete\Core\Block\BlockController::$btTitleFormats, $titleFormat, array('style' => 'width:105px;flex-grow:0;', 'class' => 'form-select')); ?>
-                            </div>
-                            <?php
-                        } else {
-							echo $form->text("pageListTitle", $pageListTitle);
-                        }
-                    ?>
-                
+                <?php
+                    if ($isV9) {
+                        ?>
+                        <div class="input-group">
+                            <?php echo $form->text("pageListTitle", $pageListTitle); ?>
+                            <?php echo $form->select('titleFormat', \Concrete\Core\Block\BlockController::$btTitleFormats, $titleFormat ?? null, array('style' => 'width:105px;flex-grow:0;', 'class' => 'form-select')); ?>
+                        </div>
+                        <?php
+                    } else {
+                        echo $form->text("pageListTitle", $pageListTitle);
+                    }
+                ?>
             </div>
     
             <div class="form-group">
-                <?php echo $form->label("noResultsMessage", ('Message to Display When No Pages Listed.')); ?>
+                <?php echo $form->label("noResultsMessage", t('Message to Display When No Pages Listed')); ?>
                 <?php echo $form->textarea("noResultsMessage", $noResultsMessage); ?>
             </div>
-    
+
             <div class="loader">
                 <i class="fas fa-cog fa-spin"></i>
             </div>
         </fieldset>
     </div>
-
 
     <div class="tab-pane" id="page-list-preview" role="tabpanel">
         <div class="render">
@@ -679,8 +708,8 @@ echo $userInterface->tabs([
     </div>
 </div>
 
+<!--suppress CssUnusedSymbol -->
 <style type="text/css">
-
     div.pagelist-form div.cover {
         width: 100%;
         height: 100%;
@@ -703,9 +732,12 @@ echo $userInterface->tabs([
         display: block !important;
     }
 </style>
+
+<!--suppress EqualityComparisonWithCoercionJS, JSJQueryEfficiency -->
 <script type="application/javascript">
     Concrete.event.publish('pagelist.edit.open');
-    $(function() {
+
+    $(function () {
         $("ul.nav.nav-tabs > li > a").on("click", function() {
             if ($(this).attr("data-tab") == 'page-list-preview' || $(this).attr("id") == "page-list-preview-tab") {
                 $("#page-list-preview").addClass("active");
@@ -715,8 +747,8 @@ echo $userInterface->tabs([
                 $("#page-list-settings").addClass("active");
             }
         });
-        
-        $('input[name=topicFilter]').on('change', function() {
+
+        $('input[name=topicFilter]').on('change', function () {
             if ($(this).val() == 'related') {
                 $('div[data-row=related-topic]').show();
                 $('div[data-row=custom-topic]').hide();
@@ -729,20 +761,24 @@ echo $userInterface->tabs([
             }
         });
 
-        var treeViewTemplate = $('.tree-view-template');
+        let treeViewTemplate = $('.tree-view-template');
 
-        $('select[name=customTopicAttributeKeyHandle]').on('change', function() {
-            var chosenTree = $(this).find('option:selected').attr('data-topic-tree-id');
+        $('select[name=customTopicAttributeKeyHandle]').on('change', function () {
+            let chosenTree = $(this).find('option:selected').attr('data-topic-tree-id');
+
             $('.tree-view-template').remove();
+
             if (!chosenTree) {
                 return;
             }
+
             $('.tree-view-container').append(treeViewTemplate);
+
             $('.tree-view-template').concreteTree({
                 'treeID': chosenTree,
                 'chooseNodeInForm': true,
-                'selectNodesByKey': [<?=(int) $customTopicTreeNodeID?>],
-                'onSelect' : function(nodes) {
+                'selectNodesByKey': [<?php echo (int)$customTopicTreeNodeID?>],
+                'onSelect': function (nodes) {
                     if (nodes.length) {
                         $('input[name=customTopicTreeNodeID]').val(nodes[0]);
                     } else {
@@ -752,11 +788,12 @@ echo $userInterface->tabs([
                 }
             });
         });
+
         $('input[name=topicFilter]:checked').trigger('change');
+
         if ($('#topicFilterCustom').is(':checked')) {
             $('select[name=customTopicAttributeKeyHandle]').trigger('change');
         }
     });
-
 </script>
 

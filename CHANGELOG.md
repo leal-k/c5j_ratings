@@ -3,6 +3,10 @@
 ### Fixed
 - PHP 7.1 & 8.2 compatibility issue
 
+## [1.1.0-rc1] - 2024-02-16
+### Fixed
+- Concrete CMS version 9.x compatibility
+
 ## [1.0.1] - 2023-03-24
 
 - Fix php8 compatible issue due to core bug

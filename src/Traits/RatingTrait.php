@@ -21,7 +21,7 @@ trait RatingTrait
     {
         $this->token = $this->app->make('helper/validation/token');
         $uID = (int) $this->post('uID');
-        if ($this->validate('rating', $this->post('token'), $uID)) {
+        if ($this->validateToken('rating', $this->post('token'), $uID)) {
             $cID = (int) $this->post('cID');
             $ratedValue = $this->post('ratedValue');
             $this->addRating($uID, $cID, $bID, $ratedValue);
@@ -36,13 +36,20 @@ trait RatingTrait
     {
         $this->token = $this->app->make('helper/validation/token');
         $uID = (int) $this->post('uID');
-        if ($this->validate('rating', $this->post('token'), $uID)) {
-            $cID = (int) $this->post('cID');
+        if ($this->validateToken('rating', $this->post('token'), $uID)) {
+            $ratings = [];
+            $cID = $this->post('cID');
+            if (is_array($cID)) {
+                foreach ($cID as $id) {
+                    $ratings[] = $this->getRatings((int)$id, $uID);
+                }
+            } else {
+                $ratings = $this->getRatings((int)$cID, $uID);
+            }
 
-            return JsonResponse::create($this->getRatings($cID, $uID));
+            return JsonResponse::create($ratings);
         }
-
-            return JsonResponse::create($this->token->getErrorMessage());
+        return JsonResponse::create($this->token->getErrorMessage());
     }
 
     public function generate($action = '', $time = null, $uID = 0): string
@@ -64,7 +71,7 @@ trait RatingTrait
         return $time . ':' . md5($time . ':' . $uID . ':' . $action . ':' . $config->get('concrete.security.token.validation'));
     }
 
-    public function validate($action = '', $token = null, $uID = 0): bool
+    public function validateToken($action = '', $token = null, $uID = 0): bool
     {
         $app = Application::getFacadeApplication();
         if ($token === null) {
