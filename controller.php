@@ -33,6 +33,7 @@ class Controller extends Package
      */
     protected $pkgVersion = '1.0.2';
 
+
     protected $pkgAutoloaderRegistries = [
         'src' => '\C5jRatings',
     ];
