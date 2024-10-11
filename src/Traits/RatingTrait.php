@@ -135,15 +135,11 @@ trait RatingTrait
     protected function isRatedBy(int $cID, int $uID, int $bID = null): bool
     { //added bID to the method so the query requests the right uID for that button
         $db = $this->app->make('database/connection');
-        $params = [];
-        $sql = 'SELECT SUM(ratedValue) AS ratings FROM C5jRatings WHERE ratedValue != 0 ';
-        if ($bID) {
-            $sql .= ' AND bID = ?';
+        $sql = 'SELECT ratedValue FROM C5jRatings WHERE cID = ? and uID = ? and ratedValue != 0';
+        $params = [$cID, $uID];
+        if($bID){
+            $sql .= ' and bID = ? ';
             $params[] = $bID;
-        }
-        if ($cID) {
-            $sql .= ' AND cID = ?';
-            $params[] = $cID;
         }
         return (int) $db->fetchColumn($sql, $params);
     }
