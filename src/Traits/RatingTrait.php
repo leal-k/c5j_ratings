@@ -111,9 +111,6 @@ trait RatingTrait
         $rating = C5jRating::getByCIDAndUIDAndBID($cID, $uID, $bID);
         if (!$rating) {
             $rating = new C5jRating();
-        } else if($ratedValue === 0){
-            $rating->delete();
-            return $rating;
         }
         $rating->setBID($bID);
         $rating->setCID($cID);
@@ -138,12 +135,15 @@ trait RatingTrait
     protected function isRatedBy(int $cID, int $uID, int $bID = null): bool
     { //added bID to the method so the query requests the right uID for that button
         $db = $this->app->make('database/connection');
-        if($bID){
-            $sql = 'SELECT ratedValue FROM C5jRatings WHERE cID = ? and uID = ? and bID = ? and ratedValue != 0';
-            $params = [$cID, $uID, $bID];
-        } else {
-            $sql = 'SELECT ratedValue FROM C5jRatings WHERE cID = ? and uID = ? and ratedValue != 0';
-            $params = [$cID, $uID];
+        $params = [];
+        $sql = 'SELECT SUM(ratedValue) AS ratings FROM C5jRatings WHERE ratedValue != 0 ';
+        if ($bID) {
+            $sql .= ' AND bID = ?';
+            $params[] = $bID;
+        }
+        if ($cID) {
+            $sql .= ' AND cID = ?';
+            $params[] = $cID;
         }
         return (int) $db->fetchColumn($sql, $params);
     }
