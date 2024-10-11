@@ -50,6 +50,7 @@ class Controller extends BlockController
     {
         $cID = (int) $this->getRequest()->getCurrentPage()->getCollectionID();
         $uID = (int) $this->app->make('user')->getUserID();
-        $this->set('ratings', $this->getRatings($cID, $uID));
+        $bID = (int) $this->bID;
+        $this->set('ratings', $this->getRatings($cID, $uID, $bID));
     }
 }

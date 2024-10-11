@@ -191,11 +191,12 @@ if (is_object($c) && $c->isEditMode() && $controller->isBlockEmpty()) {
 
                             <?php if ($btnType) {
                     $cID = $page->getCollectionID();
+                    $ratingValueID = sprintf('rating-value-%d-%d', $bID, $cID);
                     $ratingBtnID = sprintf('rating-%d-%d', $bID, $cID); ?>
                                 <div class="ratings-wrapper">
                                     <span id="<?= $ratingBtnID ?>" class="rating-<?= $cID ?> <?= $btnType ?>-btn" data-btn-type="<?= $btnType ?>" onclick="addRating($(this), <?= $cID ?>)"></span>
                                     <?php if ($displayRatings) { ?>
-                                        <span class="num-ratings"><?= $ratings['ratings'] ?? 0 ?></span>
+                                        <span id="<?= $ratingValueID ?>" class="num-ratings"><?= $ratings['ratings'] ?? 0 ?></span>
                                     <?php } ?>
                                     <input type="hidden" name="pageIDs[]" value="<?= $cID ?>">
                                 </div>

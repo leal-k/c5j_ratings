@@ -87,6 +87,14 @@ class C5jRating
             ->findOneBy(['cID' => $cID, 'uID' => $uID]);
     }
 
+    public static function getByCIDAndUIDAndBID(int $cID, int $uID, int $bID)
+    {
+        $em = \Concrete\Core\Support\Facade\DatabaseORM::entityManager();
+
+        return $em->getRepository(__CLASS__)
+            ->findOneBy(['cID' => $cID, 'uID' => $uID, 'bID' => $bID]);
+    }
+
     /**
      * @return int
      */

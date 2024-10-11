@@ -26,7 +26,7 @@ trait RatingTrait
             $ratedValue = $this->post('ratedValue');
             $this->addRating($uID, $cID, $bID, $ratedValue);
 
-            return JsonResponse::create($this->getRatings($cID, $uID));
+            return JsonResponse::create($this->getRatings($cID, $uID, $bID));
         }
 
         return JsonResponse::create($this->token->getErrorMessage());
@@ -41,10 +41,10 @@ trait RatingTrait
             $cID = $this->post('cID');
             if (is_array($cID)) {
                 foreach ($cID as $id) {
-                    $ratings[] = $this->getRatings((int)$id, $uID);
+                    $ratings[] = $this->getRatings((int)$id, $uID, $bID);
                 }
             } else {
-                $ratings = $this->getRatings((int)$cID, $uID);
+                $ratings = $this->getRatings((int)$cID, $uID, $bID);
             }
 
             return JsonResponse::create($ratings);
@@ -108,9 +108,12 @@ trait RatingTrait
 
     protected function addRating(int $uID, int $cID, int $bID, int $ratedValue): C5jRating
     {
-        $rating = C5jRating::getByCIDAndUID($cID, $uID);
+        $rating = C5jRating::getByCIDAndUIDAndBID($cID, $uID, $bID);
         if (!$rating) {
             $rating = new C5jRating();
+        } else if($ratedValue === 0){
+            $rating->delete();
+            return $rating;
         }
         $rating->setBID($bID);
         $rating->setCID($cID);
@@ -121,30 +124,43 @@ trait RatingTrait
         return $rating;
     }
 
-    protected function getRatings(int $cID, int $uID): array
+    protected function getRatings(int $cID, int $uID, int $bID): array
     {
         return [
             'cID' => $cID,
-            'isRated' => $this->isRatedBy($cID, $uID),
-            'ratings' => $this->getRatingsCount($cID),
+            'uID' => $uID,
+            'bID' => $bID,
+            'isRated' => $this->isRatedBy($cID, $uID, $bID),
+            'ratings' => $this->getRatingsCount($cID, $bID),
         ];
     }
 
-    protected function isRatedBy(int $cID, int $uID): bool
-    {
+    protected function isRatedBy(int $cID, int $uID, int $bID = null): bool
+    { //added bID to the method so the query requests the right uID for that button
         $db = $this->app->make('database/connection');
-        $sql = 'SELECT ratedValue FROM C5jRatings WHERE cID = ? and uID = ? and ratedValue != 0';
-        $params = [$cID, $uID];
-
+        if($bID){
+            $sql = 'SELECT ratedValue FROM C5jRatings WHERE cID = ? and uID = ? and bID = ? and ratedValue != 0';
+            $params = [$cID, $uID, $bID];
+        } else {
+            $sql = 'SELECT ratedValue FROM C5jRatings WHERE cID = ? and uID = ? and ratedValue != 0';
+            $params = [$cID, $uID];
+        }
         return (int) $db->fetchColumn($sql, $params);
     }
 
-    protected function getRatingsCount(int $cID): int
-    {
+    protected function getRatingsCount(int $cID, int $bID = null): int
+    { //used the base SQL for the query and if it has the parameters, it concatenates
         $db = $this->app->make('database/connection');
-        $sql = 'SELECT SUM(ratedValue) AS ratings FROM C5jRatings WHERE cID = ? and ratedValue != 0';
-        $params = [$cID];
-
+        $params = [];
+        $sql = 'SELECT SUM(ratedValue) AS ratings FROM C5jRatings WHERE ratedValue != 0 ';
+        if ($bID) {
+            $sql .= ' AND bID = ?';
+            $params[] = $bID;
+        }
+        if ($cID) {
+            $sql .= ' AND cID = ?';
+            $params[] = $cID;
+        }
         return (int) $db->fetchColumn($sql, $params);
     }
 }

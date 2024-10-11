@@ -7,7 +7,7 @@ function updateRatings(url, params) {
         url: url,
         type: 'post',
         data: params,
-        success: function(data) {
+        success: function (data) {
             if (Array.isArray(params['cID'])) {
                 data.forEach(function (item) {
                     updateRatingButtons(item);
@@ -15,16 +15,23 @@ function updateRatings(url, params) {
                 return;
             }
             updateRatingButtons(data);
+        },
+        error: function (data) {
+            console.log("Error: ", data);
         }
     });
 }
 
 function updateRatingButtons(data) {
-    $('.rating-'+data['cID']).each(function () {
-        let activeClass = $(this).data('btn-type') + '-active';
-        $(this).toggleClass(activeClass, data['isRated']);
-        if ($(this).next().is('span')) {
-            $(this).next().text(data['ratings']);
-        }
-    });
+    let ratingValueID = $("#rating-value-" + data['bID'] + "-" + data['cID']);
+    let ratingBtnID = $("#rating-" + data['bID'] + "-" + data['cID']);
+    let activeClass = ratingBtnID.data('btn-type') + '-active';
+    if (ratingValueID) {
+        ratingValueID.text(data['ratings']);
+    }
+    if(data['isRated']){
+        ratingBtnID.addClass(activeClass);
+    }else{
+        ratingBtnID.removeClass(activeClass);
+    }
 }
